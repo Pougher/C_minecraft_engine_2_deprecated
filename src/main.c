@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include "render/shader.h"
+#include "render/texture.h"
+#include "common/log.h"
+#include "common/camera.h"
+#include "core/window.h"
+#include "world/chunk.h"
+#include "world/world.h"
+#include "core/mesh.h"
+
+#include <cglm/cglm.h>
+
+void init_glfw(void) {
+    // initialize glfw
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+}
+
+void init_glew(void) {
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        log_error("Failed to initialize GLEW");
+        glfwTerminate();
+        exit(1);
+    }
+}
+
+void mouse_callback(GLFWwindow *win, double xpos, double ypos) {
+    Camera *cam = glfwGetWindowUserPointer(win);
+    if (cam->first_mouse) {
+        cam->last_x = xpos;
+        cam->last_y = ypos;
+        cam->first_mouse = 0;
+    }
+
+    float xoffset = xpos - cam->last_x;
+    float yoffset = cam->last_y - ypos;
+    cam->last_x = xpos;
+    cam->last_y = ypos;
+
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    cam->yaw += xoffset;
+    cam->pitch += yoffset;
+
+    if (cam->pitch > 89.0f) {
+        cam->pitch = 89.0f;
+    }
+    if (cam->pitch < -89.0f) {
+        cam->pitch = -89.0f;
+    }
+
+    cam->front[0] = cos(glm_rad(cam->yaw)) * cos(glm_rad(cam->pitch));
+    cam->front[1] = sin(glm_rad(cam->pitch));
+    cam->front[2] = sin(glm_rad(cam->yaw)) * cos(glm_rad(cam->pitch));
+    glm_normalize(cam->front);
+}
+
+int main(void) {
+    init_glfw();
+
+    Window win;
+    window_init(&win, 1280, 720, "Game");
+    init_glew();
+
+    glfwSetInputMode(win.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    Shader *shader = shader_new("shaders/vs0.glsl", "shaders/fs0.glsl");
+
+    // the camera
+    Camera cam;
+    camera_init(&cam, (vec3) { 0.0f, 0.0f, 0.1f });
+
+    glfwSetWindowUserPointer(win.window, &cam);
+    glfwSetCursorPosCallback(win.window, mouse_callback);
+
+    // fps timer
+    double last_time = glfwGetTime();
+    int frames = 0;
+
+    shader_use(shader);
+    shader_setmat4(shader, "proj", cam.proj);
+
+    Texture *tex = texture_new("res/test.png", GL_RGBA);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex->id);
+
+    glEnable(GL_DEPTH_TEST);
+
+    // WORLD TEST
+    World *world = world_new();
+
+    while (!glfwWindowShouldClose(win.window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        shader_setmat4(shader, "view", cam.view);
+        shader_setmat4(shader, "model", cam.model);
+        shader_setint(shader, "tex", 0);
+        world_render(world);
+
+        camera_update(&cam, win.window);
+
+        glfwSwapBuffers(win.window);
+        glfwPollEvents();
+
+        // render time
+        frames++;
+        double current_time = glfwGetTime();
+        if (current_time - last_time >= 1.0) {
+            char buffer[64];
+            sprintf(buffer, "Render time: %fms", 1000.0 / (float)frames);
+            log_info(buffer);
+            last_time = current_time;
+            frames = 0;
+        }
+
+        if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            break;
+        }
+    }
+
+    world_free(world);
+    shader_free(shader);
+    texture_free(tex);
+
+    glfwTerminate();
+
+    return 0;
+}
