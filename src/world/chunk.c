@@ -1,4 +1,5 @@
 #include "chunk.h"
+#include "../common/gamestate.h"
 
 Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
     Chunk *chunk = malloc(sizeof(Chunk));
@@ -65,6 +66,9 @@ void chunk_compute_mesh(Chunk *chunk) {
             float w;
             float h;
         } uv = { .u = 0.0f, .v = 0.0f, .w = 1.0f, .h = 1.0f };
+
+        TexUVi uvi = state->blocks[chunk->blocks[i]].get_texture_location(UP);
+        (void) uvi;
 
         uint8_t adj = chunk_test_adjacent(chunk, x, y, z);
 

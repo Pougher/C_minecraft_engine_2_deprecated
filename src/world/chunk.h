@@ -5,8 +5,9 @@
 #include <GLFW/glfw3.h>
 
 #include "../core/mesh.h"
-#include "../core/block.h"
+#include "../block/block.h"
 #include "../common/log.h"
+#include "../render/uv.h"
 
 #include <stdlib.h>
 #include <inttypes.h>

@@ -26,12 +26,20 @@ typedef struct {
 // OpenGL while rendering.
 Shader* shader_new(char*, char*);
 
+// Loads a shader into the provided shader object. Remember to unload the shader
+// after you've finished using it.
+void shader_load(Shader*, char*, char*);
+
 // Tells OpenGL to bind a shader
 void shader_use(Shader*);
 
 // Destroys the OpenGL program ID and then frees the data allocated to the
 // shader
 void shader_free(Shader*);
+
+// Does not destroy the data allocated to the shader, but does free the OpenGL
+// resources allocated to the shader
+void shader_delete(Shader*);
 
 // SENDING DATA TO SHADERS
 

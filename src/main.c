@@ -13,6 +13,8 @@
 #include "world/world.h"
 #include "core/mesh.h"
 
+#include "common/gamestate.h"
+
 #include <cglm/cglm.h>
 
 void init_glfw(void) {
@@ -75,41 +77,38 @@ int main(void) {
 
     glfwSetInputMode(win.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    Shader *shader = shader_new("shaders/vs0.glsl", "shaders/fs0.glsl");
+    gamestate_init("res/test.png",
+        (char*[]) { "shaders/vs0.glsl", "shaders/fs0.glsl" },
+        1);
 
-    // the camera
-    Camera cam;
-    camera_init(&cam, (vec3) { 0.0f, 0.0f, 0.1f });
-
-    glfwSetWindowUserPointer(win.window, &cam);
+    glfwSetWindowUserPointer(win.window, state->player_camera);
     glfwSetCursorPosCallback(win.window, mouse_callback);
+    glfwSwapInterval(0);
 
     // fps timer
     double last_time = glfwGetTime();
     int frames = 0;
 
-    shader_use(shader);
-    shader_setmat4(shader, "proj", cam.proj);
+    shader_use(&state->shaders[0]);
+    shader_setmat4(&state->shaders[0], "proj", state->player_camera->proj);
 
-    Texture *tex = texture_new("res/test.png", GL_RGBA);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex->id);
+    glBindTexture(GL_TEXTURE_2D, state->block_atlas->id);
 
     glEnable(GL_DEPTH_TEST);
-
-    // WORLD TEST
-    World *world = world_new();
 
     while (!glfwWindowShouldClose(win.window)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader_setmat4(shader, "view", cam.view);
-        shader_setmat4(shader, "model", cam.model);
-        shader_setint(shader, "tex", 0);
-        world_render(world);
+        shader_setmat4(&state->shaders[0], "view", state->player_camera->view);
+        shader_setmat4(&state->shaders[0],
+            "model",
+            state->player_camera->model);
+        shader_setint(&state->shaders[0], "tex", 0);
+        world_render(state->world);
 
-        camera_update(&cam, win.window);
+        camera_update(state->player_camera, win.window);
 
         glfwSwapBuffers(win.window);
         glfwPollEvents();
@@ -130,10 +129,7 @@ int main(void) {
         }
     }
 
-    world_free(world);
-    shader_free(shader);
-    texture_free(tex);
-
+    gamestate_free();
     glfwTerminate();
 
     return 0;

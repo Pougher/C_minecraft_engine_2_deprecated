@@ -67,6 +67,71 @@ Shader *shader_new(char *vs, char *fs) {
     return new_shader;
 }
 
+void shader_load(Shader *shader, char *vs, char *fs) {
+    shader->id = 0;
+
+    const char* vshader_code = read_file(vs);
+    const char* fshader_code = read_file(fs);
+    if (vshader_code == NULL || fshader_code == NULL) {
+        log_error("Cannot generate shader - files missing");
+        return;
+    }
+
+    unsigned int vertex;
+    unsigned int fragment;
+    int success;
+    char info[512];
+
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vshader_code, NULL);
+    glCompileShader(vertex);
+
+    // check if there are any errors, and if there are, print them
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertex, 512, NULL, info);
+        log_error(info);
+    }
+
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fshader_code, NULL);
+    glCompileShader(fragment);
+
+    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragment, 512, NULL, info);
+        log_error(info);
+    }
+    // now link the two shaders and generate a program
+    shader->id = glCreateProgram();
+    glAttachShader(shader->id, vertex);
+    glAttachShader(shader->id, fragment);
+    glLinkProgram(shader->id);
+
+    // output any linking errors
+    glGetProgramiv(shader->id, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shader->id, 512, NULL, info);
+        log_error(info);
+    }
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
+    free((char*)vshader_code);
+    free((char*)fshader_code);
+#ifndef NO_LOGS
+    char shader_log_msg[strlen(fs) + strlen(vs) + 128];
+    sprintf(
+        shader_log_msg,
+        "Generated shader %d from '%s' and '%s'",
+        shader->id,
+        vs,
+        fs);
+    log_info(shader_log_msg);
+#endif
+}
+
 void shader_use(Shader *shader) {
     glUseProgram(shader->id);
 }
@@ -74,6 +139,10 @@ void shader_use(Shader *shader) {
 void shader_free(Shader *shader) {
     glDeleteProgram(shader->id);
     free(shader);
+}
+
+void shader_delete(Shader *shader) {
+    glDeleteProgram(shader->id);
 }
 
 void shader_setbool(Shader *shader, const char *name, bool val) {
