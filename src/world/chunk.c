@@ -48,30 +48,6 @@ static uint8_t chunk_test_adjacent(Chunk *chunk, int x, int y, int z) {
     return ~result;
 }
 
-// converts a blocks texture (u,v) coordinates to a bounding box with an x, y,
-// width and height
-/*
-static inline void chunk_blockuv_to_box(vec4 *box, TexUV *uv) {
-    const double pixel_width = texture_normal_pixel_u(state->block_atlas);
-    const double pixel_height = texture_normal_pixel_v(state->block_atlas);
-
-    // set the first and second values in the vector to be the position of the
-    // blocks uv
-    (*box)[0] = (uv->u * BLOCK_SIZE) / state->block_atlas->width;
-    (*box)[1] = (uv->v * BLOCK_SIZE) / state->block_atlas->width;
-
-    // then set the third and fourth values to be the width and height of the
-    // block
-    (*box)[2] = BLOCK_SIZE * pixel_width;
-    (*box)[3] = BLOCK_SIZE * pixel_height;
-    (*box)[0] = 0.0f;
-    (*box)[1] = 0.0f;
-    (*box)[2] = 1.0f;
-    (*box)[3] = 1.0f;
-    (void) uv;
-}
-*/
-
 void chunk_compute_mesh(Chunk *chunk) {
     int x, y, z, ax, ay, az = 0;
 
