@@ -28,8 +28,9 @@ Texture *texture_new(char *filename, GLuint format) {
     glBindTexture(GL_TEXTURE_2D, new_texture->id);
 
     // set the texture attributes
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -45,7 +46,6 @@ Texture *texture_new(char *filename, GLuint format) {
         format,
         GL_UNSIGNED_BYTE,
         data);
-    glGenerateMipmap(GL_TEXTURE_2D);
 
     // free the stb image data
     free(data);
@@ -105,6 +105,13 @@ Texture *texture_empty(int width, int height, GLuint format) {
     return new_shader;
 }
 
+double texture_normal_pixel_u(Texture *texture) {
+    return (1.0f / (double)texture->width);
+}
+
+double texture_normal_pixel_v(Texture *texture) {
+    return (1.0f / (double)texture->height);
+}
 
 void texture_free(Texture *texture) {
     glDeleteTextures(1, &texture->id);

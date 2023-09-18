@@ -11,7 +11,7 @@
 
 #include "../world/world.h"
 
-#include "../render/texture.h"
+#include "../render/array_texture.h"
 #include "../render/shader.h"
 
 #include "../block/block.h"
@@ -24,7 +24,7 @@ struct GameState {
     World *world;
 
     // Global block texture atlas
-    Texture *block_atlas;
+    ArrayTexture *block_atlas;
 
     // global shaders array
     Shader *shaders;

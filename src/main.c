@@ -77,7 +77,7 @@ int main(void) {
 
     glfwSetInputMode(win.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    gamestate_init("res/test.png",
+    gamestate_init("res/block_atlas.png",
         (char*[]) { "shaders/vs0.glsl", "shaders/fs0.glsl" },
         1);
 

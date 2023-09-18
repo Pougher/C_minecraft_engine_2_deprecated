@@ -8,7 +8,7 @@ Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
     // setup the mesh with (x, y, z) and texture (u, v) coordinates
     chunk->mesh = mesh_new();
 
-    // vertex position attribute
+    // vertex position attribute, 1 extra int for block id and uvs
     mesh_add_attribute(chunk->mesh, (MeshAttribute) {
         .index = (void*) 0,
         .size = 3,
@@ -17,9 +17,10 @@ Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
 
     mesh_add_attribute(chunk->mesh, (MeshAttribute) {
         .index = (void*) (3 * sizeof(float)),
-        .size = 2,
+        .size = 3,
         .type = GL_FLOAT,
-        .bytes = sizeof(float) * 2 });
+        .bytes = sizeof(float) * 3 });
+
 
     for (int i = 0; i < CHUNK_X * CHUNK_Y * CHUNK_Z; i++)
         chunk->blocks[i] = DIRT;
@@ -47,8 +48,34 @@ static uint8_t chunk_test_adjacent(Chunk *chunk, int x, int y, int z) {
     return ~result;
 }
 
+// converts a blocks texture (u,v) coordinates to a bounding box with an x, y,
+// width and height
+/*
+static inline void chunk_blockuv_to_box(vec4 *box, TexUV *uv) {
+    const double pixel_width = texture_normal_pixel_u(state->block_atlas);
+    const double pixel_height = texture_normal_pixel_v(state->block_atlas);
+
+    // set the first and second values in the vector to be the position of the
+    // blocks uv
+    (*box)[0] = (uv->u * BLOCK_SIZE) / state->block_atlas->width;
+    (*box)[1] = (uv->v * BLOCK_SIZE) / state->block_atlas->width;
+
+    // then set the third and fourth values to be the width and height of the
+    // block
+    (*box)[2] = BLOCK_SIZE * pixel_width;
+    (*box)[3] = BLOCK_SIZE * pixel_height;
+    (*box)[0] = 0.0f;
+    (*box)[1] = 0.0f;
+    (*box)[2] = 1.0f;
+    (*box)[3] = 1.0f;
+    (void) uv;
+}
+*/
+
 void chunk_compute_mesh(Chunk *chunk) {
     int x, y, z, ax, ay, az = 0;
+
+    vec4 box = { 0.0f, 0.0f, 1.0f, 1.0f };
 
     for (int i = 0; i < CHUNK_X * CHUNK_Y * CHUNK_Z; i++) {
         z = i / (CHUNK_X * CHUNK_Y);
@@ -60,58 +87,62 @@ void chunk_compute_mesh(Chunk *chunk) {
         ay = y + chunk->y;
         az = z + chunk->z;
 
-        struct {
-            float u;
-            float v;
-            float w;
-            float h;
-        } uv = { .u = 0.0f, .v = 0.0f, .w = 1.0f, .h = 1.0f };
-
-        TexUVi uvi = state->blocks[chunk->blocks[i]].get_texture_location(UP);
-        (void) uvi;
-
         uint8_t adj = chunk_test_adjacent(chunk, x, y, z);
 
+        int index;
+
         if (adj & 0x10) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(BACKWARD, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_0(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_0(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
         if (adj & 0x20) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(FORWARD, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_1(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_1(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
         if (adj & 0x01) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(LEFT, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_2(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_2(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
         if (adj & 0x02) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(RIGHT, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_3(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_3(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
         if (adj & 0x04) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(DOWN, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_4(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_4(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
         if (adj & 0x08) {
-            mesh_add_vertices(
+            BLOCK_UV_POS(UP, index);
+            mesh_add_data(
                 chunk->mesh,
-                BLOCK_FACE_5(ax, ay, az, uv),
-                30,
+                BLOCK_FACE_5(ax, ay, az, box, index),
+                sizeof(float),
+                36,
                 6);
         }
     }

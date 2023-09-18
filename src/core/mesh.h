@@ -15,7 +15,7 @@
 
 typedef struct {
     // a pointer to the vertex mesh in the mesh
-    float *vertices;
+    void *vertices;
 
     // the number of elements in the vertex mesh
     size_t vertices_length;
@@ -48,8 +48,8 @@ Mesh *mesh_new(void);
 // reserves space for the mesh's data
 void mesh_reserve(Mesh*, size_t);
 
-// Adds vertices to the vertex mesh
-void mesh_add_vertices(Mesh*, float*, size_t, size_t);
+// Adds data to the vertex mesh
+void mesh_add_data(Mesh*, void*, size_t, size_t, size_t);
 
 // computes the vao and vbo for the mesh
 void mesh_compute_buffers(Mesh*);

@@ -32,6 +32,12 @@ Texture *texture_new(char*, GLuint);
 // Creates an empty OpenGL texture with the width and height specified
 Texture *texture_empty(int, int, GLuint);
 
+// Gets the pixel size of the image (normalized) on the x axis
+double texture_normal_pixel_u(Texture*);
+
+// Gets the pixel size of the image (normalized) on the y axis
+double texture_normal_pixel_v(Texture*);
+
 // Frees the allocated Texture, also deletes the texture within OpenGL
 void texture_free(Texture*);
 

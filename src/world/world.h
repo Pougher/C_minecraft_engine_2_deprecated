@@ -7,9 +7,9 @@
 #include "chunk.h"
 #include "../core/mesh.h"
 
-#define WORLD_X 4
-#define WORLD_Y 4
-#define WORLD_Z 4
+#define WORLD_X 1
+#define WORLD_Y 1
+#define WORLD_Z 1
 #define WORLD_AREA WORLD_X * WORLD_Y * WORLD_Z
 
 typedef struct {

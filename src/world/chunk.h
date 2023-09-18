@@ -7,7 +7,6 @@
 #include "../core/mesh.h"
 #include "../block/block.h"
 #include "../common/log.h"
-#include "../render/uv.h"
 
 #include <stdlib.h>
 #include <inttypes.h>
@@ -19,6 +18,9 @@
 #define CHUNK_Z 32
 
 #define TO_INDEX(x, y, z) z + CHUNK_Z * (y + CHUNK_Y * x)
+
+#define BLOCK_UV_POS(dir, ind)                                          \
+    ind = state->blocks[chunk->blocks[i]].get_texture_location(dir);
 
 typedef struct {
     // the mesh of the chunk, should be updated every time the data array is

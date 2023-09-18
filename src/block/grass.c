@@ -2,16 +2,16 @@
 #include "../common/gamestate.h"
 
 static int get_texture_location(Direction dir) {
-    (void) dir;
-    return 2;
+    if (dir == UP) return 0;
+    return 1;
 }
 
-void dirt_init(void) {
+void grass_init(void) {
     Block blk = {
-        .id = DIRT,
+        .id = GRASS,
         .transparent = false,
         .get_texture_location = get_texture_location
     };
 
-    state->blocks[DIRT] = blk;
+    state->blocks[GRASS] = blk;
 }

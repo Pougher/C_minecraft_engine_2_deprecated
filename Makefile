@@ -21,9 +21,12 @@ CC = clang
 $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
 
-.PHONY: clean
+.PHONY: clean, count
 clean:
 	$(RM) $(TARGET) $(OBJS) $(DEPS)
+
+count:
+	tokei src/ --exclude "stb_image.h"
 
 print-%  : ; @echo $* = $($*)
 

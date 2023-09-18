@@ -21,7 +21,7 @@ Mesh *mesh_new(void) {
 }
 
 void mesh_reserve(Mesh *mesh, size_t cap) {
-    mesh->vertices = realloc(mesh->vertices, sizeof(float) * cap);
+    mesh->vertices = realloc(mesh->vertices, cap);
     if (mesh->vertices == NULL) {
         log_error("Failed to allocate memory for chunk");
         exit(1);
@@ -30,17 +30,18 @@ void mesh_reserve(Mesh *mesh, size_t cap) {
     mesh->vertices_cap = cap;
 }
 
-void mesh_add_vertices(Mesh *mesh,
-    float *verts,
+void mesh_add_data(Mesh *mesh,
+    void *verts,
+    size_t elem_size,
     size_t len,
     size_t indices) {
-    size_t final_length = mesh->vertices_length + len;
+    size_t final_length = mesh->vertices_length + len * elem_size;
     if (final_length >= mesh->vertices_cap) {
         while (final_length >= mesh->vertices_cap)
             mesh->vertices_cap *= 2;
         mesh->vertices = realloc(
             mesh->vertices,
-            sizeof(float) * mesh->vertices_cap);
+            mesh->vertices_cap);
         if (mesh->vertices == NULL) {
             log_error("Failed to allocate mesh space: realloc() failed");
             exit(1);
@@ -50,9 +51,9 @@ void mesh_add_vertices(Mesh *mesh,
     // copy the new vertices into the allocated mesh data, offset by its
     // length
     memcpy(
-        (char*)mesh->vertices + (mesh->vertices_length * sizeof(float)),
+        (char*)mesh->vertices + mesh->vertices_length,
         verts,
-        len * sizeof(float));
+        len * elem_size);
 
     mesh->vertices_length = final_length;
     mesh->indices += indices;
@@ -76,7 +77,7 @@ void mesh_compute_buffers(Mesh *mesh) {
     // assign the buffer data from the mesh's mesh
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(float) * mesh->vertices_length,
+        mesh->vertices_length,
         mesh->vertices,
         GL_STATIC_DRAW);
 
