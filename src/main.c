@@ -13,6 +13,8 @@
 #include "world/world.h"
 #include "core/mesh.h"
 
+#include "render/grid_atlas.h"
+
 #include "common/gamestate.h"
 
 #include <cglm/cglm.h>
@@ -92,13 +94,13 @@ int main(void) {
     shader_use(&state->shaders[0]);
     shader_setmat4(&state->shaders[0], "proj", state->player_camera->proj);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, state->block_atlas->id);
-
     glEnable(GL_DEPTH_TEST);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, state->block_atlas->atlas->id);
+
     while (!glfwWindowShouldClose(win.window)) {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.509, 0.674, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader_setmat4(&state->shaders[0], "view", state->player_camera->view);

@@ -3,7 +3,10 @@
 
 Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
     Chunk *chunk = malloc(sizeof(Chunk));
-    chunk->blocks = malloc(sizeof(BlockType) * CHUNK_X * CHUNK_Y * CHUNK_Z);
+    chunk->blocks = malloc(sizeof(BlockType)
+        * CHUNK_OVERSCAN_X
+        * CHUNK_OVERSCAN_Y
+        * CHUNK_OVERSCAN_Z);
 
     // setup the mesh with (x, y, z) and texture (u, v) coordinates
     chunk->mesh = mesh_new();
@@ -22,8 +25,9 @@ Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
         .bytes = sizeof(float) * 3 });
 
 
-    for (int i = 0; i < CHUNK_X * CHUNK_Y * CHUNK_Z; i++)
-        chunk->blocks[i] = DIRT;
+    for (int i = 0; i <
+        CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y * CHUNK_OVERSCAN_Z; i++)
+        chunk->blocks[i] = AIR;
 
     chunk->x = x;
     chunk->y = y;
@@ -48,78 +52,134 @@ static uint8_t chunk_test_adjacent(Chunk *chunk, int x, int y, int z) {
     return ~result;
 }
 
+// generate multiple octaves of simplex noise
+static inline double chunk_octave_noise(struct osn_context *ctx,
+    int octaves,
+    double x,
+    double y,
+    double frequency,
+    double amplitude,
+    double persistence,
+    double lacunarity) {
+    double value = 0;
+
+    for (int i = 0; i < octaves; i++) {
+        value +=
+            amplitude * open_simplex_noise2(ctx, x * frequency, y * frequency);
+        amplitude *= persistence;
+        frequency *= lacunarity;
+    }
+
+    return value;
+}
+
+void chunk_generate(Chunk *chunk) {
+    // open simplex noise struct
+    struct osn_context *ctx;
+    open_simplex_noise(69420, &ctx);
+
+    for (int x = 0; x < CHUNK_OVERSCAN_X; x++) {
+        for (int z = 0; z < CHUNK_OVERSCAN_Z; z++) {
+            double ax = x + chunk->x - 1;
+            double az = z + chunk->z - 1;
+
+            double v = chunk_octave_noise(ctx, 4, ax, az, 0.01, 1, 0.5, 2.0);
+            int val = ((v + 1.0) / 2) * (CHUNK_Y / 3) + 30;
+
+            for (int y = 0; y < CHUNK_OVERSCAN_Y; y++) {
+                int i = x
+                    + (y * CHUNK_OVERSCAN_X)
+                    + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
+                if (y == val) {
+                    chunk->blocks[i] = GRASS;
+                } if (y < val) {
+                    chunk->blocks[i] = DIRT;
+                } if (y < (double)val * 0.8) chunk->blocks[i] = STONE;
+                if (y == 0) chunk->blocks[i] = BEDROCK;
+            }
+        }
+    }
+
+    open_simplex_noise_free(ctx);
+}
+
 void chunk_compute_mesh(Chunk *chunk) {
-    int x, y, z, ax, ay, az = 0;
+    int ax, ay, az = 0;
 
     vec4 box = { 0.0f, 0.0f, 1.0f, 1.0f };
 
-    for (int i = 0; i < CHUNK_X * CHUNK_Y * CHUNK_Z; i++) {
-        z = i / (CHUNK_X * CHUNK_Y);
-        int remainder = i % (CHUNK_X * CHUNK_Y);
-        y = remainder / CHUNK_X;
-        x = remainder % CHUNK_X;
+    for (int x = 1; x < CHUNK_OVERSCAN_X - 1; x++) {
+        for (int y = 1; y < CHUNK_OVERSCAN_Y - 1; y++) {
+            for (int z = 1; z < CHUNK_OVERSCAN_Z - 1; z++) {
+                int i = x + (y * CHUNK_OVERSCAN_X)
+                    + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
+                // if the block is transparent, dont bother to do any other
+                // computations
+                if (state->blocks[chunk->blocks[i]].transparent) continue;
 
-        ax = x + chunk->x;
-        ay = y + chunk->y;
-        az = z + chunk->z;
+                ax = x + chunk->x;
+                ay = y + chunk->y;
+                az = z + chunk->z;
 
-        uint8_t adj = chunk_test_adjacent(chunk, x, y, z);
+                uint8_t adj = chunk_test_adjacent(chunk, x, y, z);
 
-        int index;
+                int index;
 
-        if (adj & 0x10) {
-            BLOCK_UV_POS(BACKWARD, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_0(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
-        }
-        if (adj & 0x20) {
-            BLOCK_UV_POS(FORWARD, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_1(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
-        }
-        if (adj & 0x01) {
-            BLOCK_UV_POS(LEFT, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_2(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
-        }
-        if (adj & 0x02) {
-            BLOCK_UV_POS(RIGHT, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_3(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
-        }
-        if (adj & 0x04) {
-            BLOCK_UV_POS(DOWN, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_4(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
-        }
-        if (adj & 0x08) {
-            BLOCK_UV_POS(UP, index);
-            mesh_add_data(
-                chunk->mesh,
-                BLOCK_FACE_5(ax, ay, az, box, index),
-                sizeof(float),
-                36,
-                6);
+                if (adj & 0x10) {
+                    BLOCK_UV_POS(BACKWARD, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_0(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+                if (adj & 0x20) {
+                    BLOCK_UV_POS(FORWARD, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_1(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+                if (adj & 0x01) {
+                    BLOCK_UV_POS(LEFT, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_2(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+                if (adj & 0x02) {
+                    BLOCK_UV_POS(RIGHT, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_3(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+                if (adj & 0x04) {
+                    BLOCK_UV_POS(DOWN, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_4(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+                if (adj & 0x08) {
+                    BLOCK_UV_POS(UP, index);
+                    mesh_add_data(
+                        chunk->mesh,
+                        BLOCK_FACE_5(ax, ay, az, box, index),
+                        sizeof(float),
+                        36,
+                        6);
+                }
+            }
         }
     }
 
@@ -130,12 +190,13 @@ BlockType chunk_get_block(Chunk *chunk, int x, int y, int z) {
     if (x < 0 ||
         y < 0 ||
         z < 0 ||
-        x >= CHUNK_X ||
-        y >= CHUNK_Y ||
-        z >= CHUNK_Z) {
+        x >= CHUNK_OVERSCAN_X ||
+        y >= CHUNK_OVERSCAN_Y ||
+        z >= CHUNK_OVERSCAN_Z) {
         return AIR;
     }
-    int index = z + CHUNK_Z * (y + CHUNK_Y * x);
+    int index = x + (y * CHUNK_OVERSCAN_X)
+        + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
     return chunk->blocks[index];
 }
 
@@ -144,4 +205,3 @@ void chunk_free(Chunk *chunk) {
     free(chunk->blocks);
     free(chunk);
 }
-

@@ -20,7 +20,7 @@ void camera_init(Camera *cam, vec3 pos) {
 
     // calculate the model and projection matrices
     // for this I am using a perspective projection
-    glm_perspective(90.0f, 1.66666f, 0.1f, 1000.0f, cam->proj);
+    glm_perspective(glm_rad(80), 1.66666f, 0.1f, 1000.0f, cam->proj);
 
     glm_mat4_identity(cam->model);
     glm_translate(cam->model, (vec3) { 0.0f, 0.0f, -10.0f });

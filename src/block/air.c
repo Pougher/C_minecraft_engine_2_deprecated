@@ -3,15 +3,15 @@
 
 static int get_texture_location(Direction dir) {
     (void) dir;
-    return 242;
+    return 0;
 }
 
-void dirt_init(void) {
+void air_init(void) {
     Block blk = {
-        .id = DIRT,
-        .transparent = false,
+        .id = AIR,
+        .transparent = true,
         .get_texture_location = get_texture_location
     };
 
-    state->blocks[DIRT] = blk;
+    state->blocks[AIR] = blk;
 }

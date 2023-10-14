@@ -27,8 +27,11 @@ typedef struct {
 
 // Creates a new OpenGL array texture object and sets each texture to be the
 // width and height specified. The last parameter specifies the number of
-// textures in the resultant texture array.
+// textures in the resultant texture array
 ArrayTexture *array_texture_new(char*, GLuint, int, int, int);
+
+// Generates an array texture from the data provided to the function
+ArrayTexture *array_texture_from_data(unsigned char*, GLuint, int, int, int);
 
 // Frees the allocated Texture, also deletes the texture within OpenGL
 void array_texture_free(ArrayTexture*);

@@ -51,7 +51,6 @@ Texture *texture_new(char *filename, GLuint format) {
     free(data);
 
 #ifndef NO_LOGS
-    // UNSAFE
     char buffer[512 + strlen(filename)];
     sprintf(
         buffer,
@@ -67,25 +66,26 @@ Texture *texture_new(char *filename, GLuint format) {
 }
 
 Texture *texture_empty(int width, int height, GLuint format) {
-    Texture *new_shader = malloc(sizeof(Texture));
+    Texture *new_texture = malloc(sizeof(Texture));
 
     switch (format) {
-        case GL_RGB: { new_shader->channels = 3; break; }
-        case GL_RGBA: { new_shader->channels = 4; break; }
+        case GL_RGB: { new_texture->channels = 3; break; }
+        case GL_RGBA: { new_texture->channels = 4; break; }
         default: {
             log_error(
                 "Unsupported format passed to texture_empty");
             break;
         }
     }
-    new_shader->width = width;
-    new_shader->height = height;
+
+    new_texture->width = width;
+    new_texture->height = height;
 
     // generate an empty data array
-    unsigned char *empty = calloc(new_shader->channels, width * height);
+    unsigned char *empty = calloc(new_texture->channels, width * height);
 
-    glGenTextures(1, &new_shader->id);
-    glBindTexture(GL_TEXTURE_2D, new_shader->id);
+    glGenTextures(1, &new_texture->id);
+    glBindTexture(GL_TEXTURE_2D, new_texture->id);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -102,7 +102,7 @@ Texture *texture_empty(int width, int height, GLuint format) {
 
     free(empty);
 
-    return new_shader;
+    return new_texture;
 }
 
 double texture_normal_pixel_u(Texture *texture) {

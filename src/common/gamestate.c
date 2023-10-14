@@ -18,8 +18,8 @@ void gamestate_init(char *block_atlas_dir,
 
     // load the block texture atlas
     log_info("Calling init() on block atlas...");
-    state->block_atlas = array_texture_new(block_atlas_dir,
-        GL_RGBA,
+    state->block_atlas = grid_atlas_new(block_atlas_dir,
+        16,
         16,
         16,
         16);
@@ -27,6 +27,10 @@ void gamestate_init(char *block_atlas_dir,
     // initialize the world
     log_info("Calling init() on world...");
     state->world = world_new();
+
+    // generate the world
+    log_info("Generating world...");
+    world_generate(state->world);
 
     // load all of the shaders
     log_info("Calling init() on shader array...");
@@ -46,7 +50,7 @@ void gamestate_free(void) {
     world_free(state->world);
 
     // free the texture atlas
-    array_texture_free(state->block_atlas);
+    grid_atlas_free(state->block_atlas);
 
     // free all shaders
     for (int i = 0; i < state->num_shaders; i++) {

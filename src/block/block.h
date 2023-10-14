@@ -24,20 +24,20 @@
     0.0f + x, 0.0f + y, 1.0f + z, uv[0], uv[1], i }
 
 #define BLOCK_FACE_2(x, y, z, uv, i) (float[36]) {                  \
-    0.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1], i,                  \
-    0.0f + x, 1.0f + y, 0.0f + z, uv[0] + uv[2], uv[1], i,          \
-    0.0f + x, 0.0f + y, 0.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
-    0.0f + x, 0.0f + y, 0.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
-    0.0f + x, 0.0f + y, 1.0f + z, uv[0], uv[1] + uv[3], i,          \
-    0.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1], i }
+    0.0f + x, 1.0f + y, 1.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
+    0.0f + x, 1.0f + y, 0.0f + z, uv[0], uv[1] + uv[3], i,          \
+    0.0f + x, 0.0f + y, 0.0f + z, uv[0], uv[1], i,                  \
+    0.0f + x, 0.0f + y, 0.0f + z, uv[0], uv[1], i,                  \
+    0.0f + x, 0.0f + y, 1.0f + z, uv[0] + uv[2], uv[1], i,          \
+    0.0f + x, 1.0f + y, 1.0f + z, uv[0] + uv[2], uv[1] + uv[3], i }
 
 #define BLOCK_FACE_3(x, y, z, uv, i) (float[36]) {                  \
-    1.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1], i,                  \
-    1.0f + x, 1.0f + y, 0.0f + z, uv[0] + uv[2], uv[1], i,          \
-    1.0f + x, 0.0f + y, 0.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
-    1.0f + x, 0.0f + y, 0.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
-    1.0f + x, 0.0f + y, 1.0f + z, uv[0], uv[1] + uv[3], i,          \
-    1.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1], i }
+    1.0f + x, 1.0f + y, 1.0f + z, uv[0] + uv[2], uv[1] + uv[3], i,  \
+    1.0f + x, 1.0f + y, 0.0f + z, uv[0], uv[1] + uv[3], i,          \
+    1.0f + x, 0.0f + y, 0.0f + z, uv[0], uv[1], i,                  \
+    1.0f + x, 0.0f + y, 0.0f + z, uv[0], uv[1], i,                  \
+    1.0f + x, 0.0f + y, 1.0f + z, uv[0] + uv[2], uv[1], i,          \
+    1.0f + x, 1.0f + y, 1.0f + z, uv[0] + uv[2], uv[1] + uv[3], i }
 
 #define BLOCK_FACE_4(x, y, z, uv, i) (float[36]) {                  \
     0.0f + x, 0.0f + y, 0.0f + z, uv[0], uv[1], i,                  \
@@ -55,12 +55,14 @@
     0.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1] + uv[3], i,          \
     0.0f + x, 1.0f + y, 0.0f + z, uv[0], uv[1], i}
 
-#define NUM_BLOCKS 3
+#define NUM_BLOCKS 5
 
 typedef enum {
     AIR         = 0,
     DIRT        = 1,
     GRASS       = 2,
+    STONE       = 3,
+    BEDROCK     = 4,
 } BlockType;
 
 typedef enum {
@@ -84,7 +86,7 @@ typedef struct {
 } Block;
 
 // macro to automatically generate block declarations
-#define BLOCK_DECL(name)                \
+#define BLOCK_DECL(name)           \
     extern void name##_init(void); \
     name##_init()
 

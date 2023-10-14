@@ -7,20 +7,29 @@
 #include "../core/mesh.h"
 #include "../block/block.h"
 #include "../common/log.h"
+#include "../common/noise.h"
 
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define CHUNK_X 32
-#define CHUNK_Y 32
+#define CHUNK_Y 128
 #define CHUNK_Z 32
+
+#define CHUNK_OVERSCAN_X (CHUNK_X + 2)
+#define CHUNK_OVERSCAN_Y (CHUNK_Y + 2)
+#define CHUNK_OVERSCAN_Z (CHUNK_Z + 2)
 
 #define TO_INDEX(x, y, z) z + CHUNK_Z * (y + CHUNK_Y * x)
 
-#define BLOCK_UV_POS(dir, ind)                                          \
+#define BLOCK_UV_POS(dir, ind) \
     ind = state->blocks[chunk->blocks[i]].get_texture_location(dir);
+
+#define TEST_ADJACENT(_test, _v, _r) \
+    if (_test) { _v = _r; adjacent = true; }
 
 typedef struct {
     // the mesh of the chunk, should be updated every time the data array is
@@ -39,11 +48,19 @@ typedef struct {
 
     // the z location of the chunk
     int64_t z;
+
+    // the relative location of the chunk to the rest of the world
+    int rx;
+    int ry;
+    int rz;
 } Chunk;
 
 // creates a new chunk at an x and y coordinate. Automatically allocates the
 // chunk's internal mesh and block data
 Chunk *chunk_new(int64_t, int64_t, int64_t);
+
+// generates the chunk with simplex noise to create a realistic world
+void chunk_generate(Chunk*);
 
 // frees the chunk's mesh and internal block data
 void chunk_free(Chunk*);
