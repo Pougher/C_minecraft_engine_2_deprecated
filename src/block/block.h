@@ -55,14 +55,16 @@
     0.0f + x, 1.0f + y, 1.0f + z, uv[0], uv[1] + uv[3], i,          \
     0.0f + x, 1.0f + y, 0.0f + z, uv[0], uv[1], i}
 
-#define NUM_BLOCKS 5
+#define NUM_BLOCKS 7
 
 typedef enum {
     AIR         = 0,
     DIRT        = 1,
     GRASS       = 2,
     STONE       = 3,
-    BEDROCK     = 4,
+    SAND        = 4,
+    WATER       = 5,
+    BEDROCK     = 6,
 } BlockType;
 
 typedef enum {
@@ -80,6 +82,9 @@ typedef struct {
 
     // block transparency (the block will not be rendered)
     bool transparent;
+
+    // if the block is a fluid
+    bool fluid;
 
     // a function to get the texture location of the block id
     int (*get_texture_location)(Direction);

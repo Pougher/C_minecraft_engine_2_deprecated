@@ -32,9 +32,13 @@
     if (_test) { _v = _r; adjacent = true; }
 
 typedef struct {
-    // the mesh of the chunk, should be updated every time the data array is
-    // changed
-    Mesh *mesh;
+    // the solid mesh of the chunk, should be updated every time the data array
+    // is changed. Only stores the data of solid blocks
+    Mesh *solid_mesh;
+
+    // the fluid mesh of the chunk. Holds all vertex information regarding
+    // translucent geometry.
+    Mesh *fluid_mesh;
 
     // The block data array, holds a list of blocks in 1 dimensional form. Each
     // index into the array has to be mathematically calculated

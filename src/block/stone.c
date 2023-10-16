@@ -10,6 +10,7 @@ void stone_init(void) {
     Block blk = {
         .id = STONE,
         .transparent = false,
+        .fluid = false,
         .get_texture_location = get_texture_location
     };
 

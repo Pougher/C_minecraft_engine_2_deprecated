@@ -11,6 +11,7 @@ void grass_init(void) {
     Block blk = {
         .id = GRASS,
         .transparent = false,
+        .fluid = false,
         .get_texture_location = get_texture_location
     };
 

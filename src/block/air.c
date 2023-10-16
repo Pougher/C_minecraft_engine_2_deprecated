@@ -10,6 +10,7 @@ void air_init(void) {
     Block blk = {
         .id = AIR,
         .transparent = true,
+        .fluid = false,
         .get_texture_location = get_texture_location
     };
 

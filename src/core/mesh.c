@@ -123,6 +123,19 @@ void mesh_add_attribute(Mesh *mesh, MeshAttribute attribute) {
     mesh->attribute_size += attribute.bytes;
 }
 
+void mesh_copy_attributes(Mesh* dest, Mesh* src) {
+    free(dest->attributes);
+    dest->attributes = malloc(sizeof(MeshAttribute) * src->attribute_count);
+
+    // copy the attributes over
+    memcpy(dest->attributes,
+        src->attributes,
+        sizeof(MeshAttribute) * src->attribute_count);
+
+    dest->attribute_count = src->attribute_count;
+    dest->attribute_size = src->attribute_size;
+}
+
 void mesh_dump_attributes(Mesh *mesh) {
     for (uint8_t i = 0; i < mesh->attribute_count; i++) {
         printf("ATTRIBUTE %d:\n", i);

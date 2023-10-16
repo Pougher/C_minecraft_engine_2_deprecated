@@ -60,9 +60,12 @@ void mesh_render(Mesh*);
 // prints information about the mesh to stdout
 void mesh_stats(Mesh*);
 
-// adds an attribute to the meshs' list of attributes, which are then used when
+// adds an attribute to the mesh's list of attributes, which are then used when
 // generating the vao
 void mesh_add_attribute(Mesh*, MeshAttribute);
+
+// copies the attributes from one mesh to another
+void mesh_copy_attributes(Mesh*, Mesh*);
 
 // dumps the mesh attributes to stdout
 void mesh_dump_attributes(Mesh*);

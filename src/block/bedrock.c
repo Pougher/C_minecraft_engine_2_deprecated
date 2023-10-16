@@ -10,6 +10,7 @@ void bedrock_init(void) {
     Block blk = {
         .id = BEDROCK,
         .transparent = false,
+        .fluid = false,
         .get_texture_location = get_texture_location
     };
 

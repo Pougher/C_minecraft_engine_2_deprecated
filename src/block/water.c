@@ -3,16 +3,16 @@
 
 static int get_texture_location(Direction dir) {
     (void) dir;
-    return 242;
+    return 47;
 }
 
-void dirt_init(void) {
+void water_init(void) {
     Block blk = {
-        .id = DIRT,
+        .id = WATER,
         .transparent = false,
-        .fluid = false,
+        .fluid = true,
         .get_texture_location = get_texture_location
     };
 
-    state->blocks[DIRT] = blk;
+    state->blocks[WATER] = blk;
 }

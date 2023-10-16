@@ -35,7 +35,8 @@ void world_generate(World *world) {
     for (int i = 0; i < WORLD_X * WORLD_Y * WORLD_Z; i++) {
         chunk_generate(world->chunks[i]);
         chunk_compute_mesh(world->chunks[i]);
-        total_vertices += world->chunks[i]->mesh->vertices_length;
+        total_vertices += world->chunks[i]->solid_mesh->vertices_length;
+        total_vertices += world->chunks[i]->fluid_mesh->vertices_length;
     }
 
     char buf[64];
@@ -45,7 +46,12 @@ void world_generate(World *world) {
 
 void world_render(World *world) {
     for (int i = 0; i < WORLD_AREA; i++) {
-        mesh_render(world->chunks[i]->mesh);
+        mesh_render(world->chunks[i]->solid_mesh);
+    }
+
+    // after the first solid geometry pass, render the translucent geometry
+    for (int i = 0; i < WORLD_AREA; i++) {
+        mesh_render(world->chunks[i]->fluid_mesh);
     }
 }
 
