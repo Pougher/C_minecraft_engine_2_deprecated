@@ -42,12 +42,6 @@ Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
 static uint8_t chunk_test_adjacent_solid(Chunk *chunk, int x, int y, int z) {
     uint8_t result = 0;
 
-    //result |= (chunk_get_block(chunk, x - 1, y, z) == AIR);
-    //result |= (chunk_get_block(chunk, x + 1, y, z) == AIR) << 1;
-    //result |= (chunk_get_block(chunk, x, y - 1, z) == AIR) << 2;
-    //result |= (chunk_get_block(chunk, x, y + 1, z) == AIR) << 3;
-    //result |= (chunk_get_block(chunk, x, y, z - 1) == AIR) << 4;
-    //result |= (chunk_get_block(chunk, x, y, z + 1) == AIR) << 5;
     result |=
         !(state->blocks[chunk_get_block(chunk, x - 1, y, z)].transparent
         || state->blocks[chunk_get_block(chunk, x - 1, y, z)].fluid);
@@ -144,6 +138,10 @@ void chunk_compute_mesh(Chunk *chunk) {
     int ax, ay, az = 0;
 
     vec4 box = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+    // reset the chunks mesh information
+    mesh_reset(chunk->fluid_mesh);
+    mesh_reset(chunk->solid_mesh);
 
     for (int x = 1; x < CHUNK_OVERSCAN_X - 1; x++) {
         for (int y = 1; y < CHUNK_OVERSCAN_Y - 1; y++) {

@@ -59,6 +59,15 @@ void mesh_add_data(Mesh *mesh,
     mesh->indices += indices;
 }
 
+void mesh_reset(Mesh *mesh) {
+    free(mesh->vertices);
+
+    mesh->vertices = NULL;
+    mesh->vertices_length = 0;
+    mesh->vertices_cap = 1;
+    mesh->indices = 0;
+}
+
 void mesh_compute_buffers(Mesh *mesh) {
     // delete the old vao and vbo
     glDeleteVertexArrays(1, &mesh->vao);

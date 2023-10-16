@@ -51,6 +51,9 @@ void mesh_reserve(Mesh*, size_t);
 // Adds data to the vertex mesh
 void mesh_add_data(Mesh*, void*, size_t, size_t, size_t);
 
+// resets the data stored in the mesh using free
+void mesh_reset(Mesh*);
+
 // computes the vao and vbo for the mesh
 void mesh_compute_buffers(Mesh*);
 
