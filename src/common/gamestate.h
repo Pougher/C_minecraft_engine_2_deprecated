@@ -16,6 +16,8 @@
 
 #include "../block/block.h"
 
+#include "../common/types.h"
+
 struct GameState {
     // the camera for the player
     Camera *player_camera;
@@ -30,7 +32,7 @@ struct GameState {
     Shader *shaders;
 
     // the number of allocated shaders
-    int num_shaders;
+    i32 num_shaders;
 
     // information about various block types
     Block blocks[NUM_BLOCKS];
@@ -39,7 +41,7 @@ struct GameState {
 extern struct GameState *state;
 
 // initializes a gamestate object
-void gamestate_init(char*, char**, int);
+void gamestate_init(char*, char**, i32);
 
 // frees all data allocated to the gamestate struct
 void gamestate_free(void);

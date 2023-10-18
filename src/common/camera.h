@@ -8,6 +8,8 @@
 
 #include "../core/window.h"
 
+#include "../common/types.h"
+
 #define CAMERA_RESULT tmp
 #define CAMERA_SPEEDFW vec3 CAMERA_RESULT; \
     glm_vec3_scale(cam->front, speed, CAMERA_RESULT)
@@ -31,12 +33,12 @@ typedef struct {
     mat4 proj;
 
     // camera mouse control variables
-    int first_mouse;
-    double last_x;
-    double last_y;
+    i32 first_mouse;
+    f64 last_x;
+    f64 last_y;
 
-    float yaw;
-    float pitch;
+    f32 yaw;
+    f32 pitch;
 } Camera;
 
 // initializes a camera, initializing pos to the vector passed to the function

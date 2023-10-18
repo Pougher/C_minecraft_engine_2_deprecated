@@ -40,7 +40,7 @@ void camera_init(Camera *cam, vec3 pos) {
 }
 
 void camera_update(Camera *cam, GLFWwindow *win) {
-    static const float speed = 0.1f;
+    static const f32 speed = 0.1f;
     if (glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS) {
         CAMERA_SPEEDFW;
         glm_vec3_add(cam->pos, CAMERA_RESULT, cam->pos);

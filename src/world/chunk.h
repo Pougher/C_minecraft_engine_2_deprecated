@@ -8,11 +8,11 @@
 #include "../block/block.h"
 #include "../common/log.h"
 #include "../common/noise.h"
+#include "../common/types.h"
 
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
 
 #define CHUNK_X 32
@@ -45,23 +45,23 @@ typedef struct {
     BlockType *blocks;
 
     // the x location of the chunk
-    int64_t x;
+    i64 x;
 
     // the y location of the chunk
-    int64_t y;
+    i64 y;
 
     // the z location of the chunk
-    int64_t z;
+    i64 z;
 
     // the relative location of the chunk to the rest of the world
-    int rx;
-    int ry;
-    int rz;
+    i16 rx;
+    i16 ry;
+    i16 rz;
 } Chunk;
 
 // creates a new chunk at an x and y coordinate. Automatically allocates the
 // chunk's internal mesh and block data
-Chunk *chunk_new(int64_t, int64_t, int64_t);
+Chunk *chunk_new(i64, i64, i64);
 
 // generates the chunk with simplex noise to create a realistic world
 void chunk_generate(Chunk*);
@@ -73,6 +73,6 @@ void chunk_free(Chunk*);
 void chunk_compute_mesh(Chunk*);
 
 // gets a block from a chunk at an (x, y, z) coordinate
-BlockType chunk_get_block(Chunk*, int, int, int);
+BlockType chunk_get_block(Chunk*, i32, i32, i32);
 
 #endif

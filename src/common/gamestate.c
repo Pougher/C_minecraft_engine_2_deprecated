@@ -4,7 +4,7 @@ struct GameState *state = NULL;
 
 void gamestate_init(char *block_atlas_dir,
     char **shaders,
-    int num_shaders) {
+    i32 num_shaders) {
     state = malloc(sizeof(struct GameState));
 
     // load information about each block
@@ -37,7 +37,7 @@ void gamestate_init(char *block_atlas_dir,
     state->num_shaders = num_shaders;
     state->shaders = malloc(sizeof(Shader) * num_shaders);
 
-    for (int i = 0; i < num_shaders; i++) {
+    for (i32 i = 0; i < num_shaders; i++) {
         shader_load(&state->shaders[i], shaders[i * 2], shaders[i * 2 + 1]);
     }
 }
@@ -53,7 +53,7 @@ void gamestate_free(void) {
     grid_atlas_free(state->block_atlas);
 
     // free all shaders
-    for (int i = 0; i < state->num_shaders; i++) {
+    for (i32 i = 0; i < state->num_shaders; i++) {
         shader_delete(&state->shaders[i]);
     }
 

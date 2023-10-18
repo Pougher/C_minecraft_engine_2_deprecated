@@ -1,7 +1,7 @@
 #include "chunk.h"
 #include "../common/gamestate.h"
 
-Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
+Chunk *chunk_new(i64 x, i64 y, i64 z) {
     Chunk *chunk = malloc(sizeof(Chunk));
     chunk->blocks = malloc(sizeof(BlockType)
         * CHUNK_OVERSCAN_X
@@ -39,8 +39,8 @@ Chunk *chunk_new(int64_t x, int64_t y, int64_t z) {
 }
 
 // tests the sides of a block and returns a bitset
-static uint8_t chunk_test_adjacent_solid(Chunk *chunk, int x, int y, int z) {
-    uint8_t result = 0;
+static u8 chunk_test_adjacent_solid(Chunk *chunk, i32 x, i32 y, i32 z) {
+    u8 result = 0;
 
     result |=
         !(state->blocks[chunk_get_block(chunk, x - 1, y, z)].transparent
@@ -64,8 +64,8 @@ static uint8_t chunk_test_adjacent_solid(Chunk *chunk, int x, int y, int z) {
 }
 
 // test the sides of chunks for translucent geometry
-static uint8_t chunk_test_adjacent_fluid(Chunk *chunk, int x, int y, int z) {
-    uint8_t result = 0;
+static i8 chunk_test_adjacent_fluid(Chunk *chunk, i32 x, i32 y, i32 z) {
+    i8 result = 0;
 
     result |= (chunk_get_block(chunk, x - 1, y, z) == AIR);
     result |= (chunk_get_block(chunk, x + 1, y, z) == AIR) << 1;
@@ -81,16 +81,16 @@ static uint8_t chunk_test_adjacent_fluid(Chunk *chunk, int x, int y, int z) {
 
 // generate multiple octaves of simplex noise
 static inline double chunk_octave_noise(struct osn_context *ctx,
-    int octaves,
-    double x,
-    double y,
-    double frequency,
-    double amplitude,
-    double persistence,
-    double lacunarity) {
-    double value = 0;
+    i32 octaves,
+    f64 x,
+    f64 y,
+    f64 frequency,
+    f64 amplitude,
+    f64 persistence,
+    f64 lacunarity) {
+    f64 value = 0;
 
-    for (int i = 0; i < octaves; i++) {
+    for (i32 i = 0; i < octaves; i++) {
         value +=
             amplitude * open_simplex_noise2(ctx, x * frequency, y * frequency);
         amplitude *= persistence;
@@ -105,16 +105,16 @@ void chunk_generate(Chunk *chunk) {
     struct osn_context *ctx;
     open_simplex_noise(69420, &ctx);
 
-    for (int x = 0; x < CHUNK_OVERSCAN_X; x++) {
-        for (int z = 0; z < CHUNK_OVERSCAN_Z; z++) {
-            double ax = x + chunk->x - 1;
-            double az = z + chunk->z - 1;
+    for (i32 x = 0; x < CHUNK_OVERSCAN_X; x++) {
+        for (i32 z = 0; z < CHUNK_OVERSCAN_Z; z++) {
+            f64 ax = x + chunk->x - 1;
+            f64 az = z + chunk->z - 1;
 
-            double v = chunk_octave_noise(ctx, 4, ax, az, 0.01, 1, 0.5, 2.0);
+            f64 v = chunk_octave_noise(ctx, 4, ax, az, 0.01, 1, 0.5, 2.0);
             int val = ((v + 1.0) / 2) * (CHUNK_Y / 3) + 30;
 
-            for (int y = 0; y < CHUNK_OVERSCAN_Y; y++) {
-                int i = x
+            for (i32 y = 0; y < CHUNK_OVERSCAN_Y; y++) {
+                i32 i = x
                     + (y * CHUNK_OVERSCAN_X)
                     + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
                 if (y < 47) chunk->blocks[i] = WATER;
@@ -125,7 +125,7 @@ void chunk_generate(Chunk *chunk) {
                     chunk->blocks[i] = DIRT;
                 }
                 if (y == val && val < 50) chunk->blocks[i] = SAND;
-                if (y < (double)val * 0.8) chunk->blocks[i] = STONE;
+                if (y < (f64)val * 0.8) chunk->blocks[i] = STONE;
                 if (y == 0) chunk->blocks[i] = BEDROCK;
             }
         }
@@ -135,7 +135,7 @@ void chunk_generate(Chunk *chunk) {
 }
 
 void chunk_compute_mesh(Chunk *chunk) {
-    int ax, ay, az = 0;
+    i32 ax, ay, az = 0;
 
     vec4 box = { 0.0f, 0.0f, 1.0f, 1.0f };
 
@@ -143,17 +143,17 @@ void chunk_compute_mesh(Chunk *chunk) {
     mesh_reset(chunk->fluid_mesh);
     mesh_reset(chunk->solid_mesh);
 
-    for (int x = 1; x < CHUNK_OVERSCAN_X - 1; x++) {
-        for (int y = 1; y < CHUNK_OVERSCAN_Y - 1; y++) {
-            for (int z = 1; z < CHUNK_OVERSCAN_Z - 1; z++) {
-                int i = x + (y * CHUNK_OVERSCAN_X)
+    for (i32 x = 1; x < CHUNK_OVERSCAN_X - 1; x++) {
+        for (i32 y = 1; y < CHUNK_OVERSCAN_Y - 1; y++) {
+            for (i32 z = 1; z < CHUNK_OVERSCAN_Z - 1; z++) {
+                i32 i = x + (y * CHUNK_OVERSCAN_X)
                     + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
                 // if the block is air, dont bother to do any other
                 // computations
                 if (chunk->blocks[i] == AIR) continue;
 
                 // adjacency test for solids and liquids + mesh selection
-                uint8_t adj;
+                i8 adj;
                 Mesh *mesh;
 
                 if (state->blocks[chunk->blocks[i]].fluid) {
@@ -169,14 +169,14 @@ void chunk_compute_mesh(Chunk *chunk) {
                 az = z + chunk->z;
 
 
-                int index;
+                i32 index;
 
                 if (adj & 0x10) {
                     BLOCK_UV_POS(BACKWARD, index);
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_0(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -185,7 +185,7 @@ void chunk_compute_mesh(Chunk *chunk) {
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_1(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -194,7 +194,7 @@ void chunk_compute_mesh(Chunk *chunk) {
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_2(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -203,7 +203,7 @@ void chunk_compute_mesh(Chunk *chunk) {
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_3(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -212,7 +212,7 @@ void chunk_compute_mesh(Chunk *chunk) {
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_4(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -221,7 +221,7 @@ void chunk_compute_mesh(Chunk *chunk) {
                     mesh_add_data(
                         mesh,
                         BLOCK_FACE_5(ax, ay, az, box, index),
-                        sizeof(float),
+                        sizeof(f32),
                         36,
                         6);
                 }
@@ -233,7 +233,7 @@ void chunk_compute_mesh(Chunk *chunk) {
     mesh_compute_buffers(chunk->fluid_mesh);
 }
 
-BlockType chunk_get_block(Chunk *chunk, int x, int y, int z) {
+BlockType chunk_get_block(Chunk *chunk, i32 x, i32 y, i32 z) {
     if (x < 0 ||
         y < 0 ||
         z < 0 ||
@@ -242,7 +242,7 @@ BlockType chunk_get_block(Chunk *chunk, int x, int y, int z) {
         z >= CHUNK_OVERSCAN_Z) {
         return AIR;
     }
-    int index = x + (y * CHUNK_OVERSCAN_X)
+    i32 index = x + (y * CHUNK_OVERSCAN_X)
         + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
     return chunk->blocks[index];
 }

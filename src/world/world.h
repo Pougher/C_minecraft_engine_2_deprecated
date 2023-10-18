@@ -5,11 +5,14 @@
 #include <stdlib.h>
 
 #include "chunk.h"
+
 #include "../core/mesh.h"
 
-#define WORLD_X 32
+#include "../common/types.h"
+
+#define WORLD_X 8
 #define WORLD_Y 1
-#define WORLD_Z 32
+#define WORLD_Z 8
 #define WORLD_AREA WORLD_X * WORLD_Y * WORLD_Z
 
 typedef struct {
@@ -17,13 +20,13 @@ typedef struct {
     Chunk **chunks;
 
     // the width of the world
-    int width;
+    i32 width;
 
     // the height of the world
-    int height;
+    i32 height;
 
     // the depth of the world
-    int depth;
+    i32 depth;
 } World;
 
 // creates a new world with a list of chunks which has a size that is controlled
