@@ -168,7 +168,6 @@ void chunk_compute_mesh(Chunk *chunk) {
                 ay = y + chunk->y;
                 az = z + chunk->z;
 
-
                 i32 index;
 
                 if (adj & 0x10) {

@@ -19,7 +19,7 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 
 // floating point types
-typedef float32_t f32;
-typedef float64_t f64;
+typedef float f32;
+typedef double f64;
 
 #endif
