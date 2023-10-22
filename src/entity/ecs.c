@@ -51,6 +51,7 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
         if (entity->components[i] != ECS_EMPTY) {
             switch (i) {
                 ECS_DELETE(POSITION, position);
+                ECS_DELETE(CAMERA, camera);
             }
         }
     }
