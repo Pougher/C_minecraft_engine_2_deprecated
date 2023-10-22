@@ -40,6 +40,10 @@ void gamestate_init(char *block_atlas_dir,
     for (i32 i = 0; i < num_shaders; i++) {
         shader_load(&state->shaders[i], shaders[i * 2], shaders[i * 2 + 1]);
     }
+
+    // the entity component system
+    log_info("Calling init() on Entity Component System (ECS)");
+    state->ecs = ecs_new();
 }
 
 void gamestate_free(void) {
@@ -56,6 +60,8 @@ void gamestate_free(void) {
     for (i32 i = 0; i < state->num_shaders; i++) {
         shader_delete(&state->shaders[i]);
     }
-
     free(state->shaders);
+
+    // destroy the entity component system
+    ecs_free(state->ecs);
 }

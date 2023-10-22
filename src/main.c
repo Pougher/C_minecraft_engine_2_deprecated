@@ -96,7 +96,7 @@ int main(void) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, state->block_atlas->atlas->id);
@@ -131,6 +131,9 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             break;
         }
+
+        // update the ECS
+        ecs_update(state->ecs);
     }
 
     gamestate_free();

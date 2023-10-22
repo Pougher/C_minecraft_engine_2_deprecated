@@ -18,6 +18,8 @@
 
 #include "../common/types.h"
 
+#include "../entity/ecs.h"
+
 struct GameState {
     // the camera for the player
     Camera *player_camera;
@@ -31,11 +33,14 @@ struct GameState {
     // global shaders array
     Shader *shaders;
 
-    // the number of allocated shaders
-    i32 num_shaders;
-
     // information about various block types
     Block blocks[NUM_BLOCKS];
+
+    // the entity manager
+    ECSManager *ecs;
+
+    // the number of allocated shaders
+    i32 num_shaders;
 };
 
 extern struct GameState *state;

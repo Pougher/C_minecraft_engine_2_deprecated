@@ -11,4 +11,7 @@ typedef struct {
     i64 z;
 } ECSposition;
 
+// initializes the values of a new position component
+void ecs_position_init(ECSposition*);
+
 #endif
