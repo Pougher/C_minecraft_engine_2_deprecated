@@ -5,6 +5,7 @@ ECSManager *ecs_new(void) {
     manager->id = 0;
 
     ECS_COMPONENT(position);
+    ECS_COMPONENT(camera);
 
     return manager;
 }
@@ -25,6 +26,11 @@ Entity *ecs_create_entity(ECSManager *manager,
             case POSITION: {
                 ECS_ADD_COMPONENT(position);
                 entity->components[POSITION] = manager->position->length - 1;
+                break;
+            }
+            case CAMERA: {
+                ECS_ADD_COMPONENT(camera);
+                entity->components[CAMERA] = manager->camera->length - 1;
                 break;
             }
             default: {
@@ -53,6 +59,10 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
 
 void ecs_update(ECSManager *manager) {
     (void) manager;
+}
+
+u64 ecs_get_component_id(Entity *entity, u64 id) {
+    return entity->components[id];
 }
 
 void ecs_free(ECSManager *manager) {

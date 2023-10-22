@@ -12,7 +12,9 @@
 #include "ecs_type.h"
 #include "ecs_type.h"
 #include "entity.h"
+
 #include "ecs_position.h"
+#include "ecs_camera.h"
 
 // macro to generate memory allocations for dynamic arrays containing entity
 // components
@@ -39,6 +41,7 @@
 typedef struct {
     // the entity component lists that any entity can use
     DynArray *position;
+    DynArray *camera;
 
     // the highest ID of the previously allocated entity
     u64 id;
@@ -55,6 +58,9 @@ void ecs_delete_entity(ECSManager*, Entity*);
 
 // updates all of the components in the ECS
 void ecs_update(ECSManager*);
+
+// returns the ID of the component within the entity
+u64 ecs_get_component_id(Entity*, u64);
 
 // frees all data bound to the ECS including all memory allocated to entity
 // components within the entity component list

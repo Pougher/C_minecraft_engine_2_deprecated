@@ -2,13 +2,14 @@
 #define ECS_RECIPE_H
 
 // the total number of components
-#define TOTAL_COMPONENTS 1
+#define TOTAL_COMPONENTS 2
 
 // the value of an empty component slot
 #define ECS_EMPTY 18446744073709551615ULL
 
 typedef enum {
-    POSITION        = 0
+    POSITION        = 0,
+    CAMERA          = 1
 } ECSType;
 
 #endif

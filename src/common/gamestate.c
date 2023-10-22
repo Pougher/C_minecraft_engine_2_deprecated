@@ -11,11 +11,6 @@ void gamestate_init(char *block_atlas_dir,
     log_info("Calling init() on block information array...");
     block_init();
 
-    // first, allocate and initialize the player camera
-    log_info("Calling init() on player camera...");
-    state->player_camera = malloc(sizeof(Camera));
-    camera_init(state->player_camera, (vec3) { 0.0f, 0.0f, 0.0f });
-
     // load the block texture atlas
     log_info("Calling init() on block atlas...");
     state->block_atlas = grid_atlas_new(block_atlas_dir,
@@ -44,13 +39,14 @@ void gamestate_init(char *block_atlas_dir,
     // the entity component system
     log_info("Calling init() on Entity Component System (ECS)");
     state->ecs = ecs_new();
+
+    // create the player entity
+    log_info("Creating the player entity");
+    state->player = ecs_create_entity(state->ecs, (ECSType[]) { CAMERA }, 1);
 }
 
 void gamestate_free(void) {
-    // first, free the player camera
-    free(state->player_camera);
-
-    // then, free the world
+    // free the world data
     world_free(state->world);
 
     // free the texture atlas

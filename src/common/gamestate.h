@@ -21,8 +21,8 @@
 #include "../entity/ecs.h"
 
 struct GameState {
-    // the camera for the player
-    Camera *player_camera;
+    // the player entity
+    Entity *player;
 
     // world data
     World *world;

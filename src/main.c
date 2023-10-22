@@ -83,7 +83,11 @@ int main(void) {
         (char*[]) { "shaders/vs0.glsl", "shaders/fs0.glsl" },
         1);
 
-    glfwSetWindowUserPointer(win.window, state->player_camera);
+    Camera *cam = dynarray_get(state->ecs->camera,
+        ecs_get_component_id(state->player, CAMERA));
+
+    glfwSetWindowUserPointer(win.window, cam);
+
     glfwSetCursorPosCallback(win.window, mouse_callback);
     glfwSwapInterval(0);
 
@@ -92,7 +96,7 @@ int main(void) {
     int frames = 0;
 
     shader_use(&state->shaders[0]);
-    shader_setmat4(&state->shaders[0], "proj", state->player_camera->proj);
+    shader_setmat4(&state->shaders[0], "proj", cam->proj);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -105,14 +109,12 @@ int main(void) {
         glClearColor(0.509, 0.674, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader_setmat4(&state->shaders[0], "view", state->player_camera->view);
-        shader_setmat4(&state->shaders[0],
-            "model",
-            state->player_camera->model);
+        shader_setmat4(&state->shaders[0], "view", cam->view);
+        shader_setmat4(&state->shaders[0], "model", cam->model);
         shader_setint(&state->shaders[0], "tex", 0);
         world_render(state->world);
 
-        camera_update(state->player_camera, win.window);
+        camera_update(cam, win.window);
 
         glfwSwapBuffers(win.window);
         glfwPollEvents();
