@@ -38,6 +38,20 @@
                                          entity->components[i]);        \
                                   break; }
 
+// quick and dirty macro for getting the pointer to a specific component within
+// an entity, given a variable name (the entity pointer) and a component type
+#define ECS_GET_COMPONENT(_ecs, _name, _component, _key) \
+    ((ECS##_component*) dynarray_get(                    \
+        _ecs->_component,                                \
+        _name->components[_key]));
+
+// generates a for loop which iterates over all instances of the specified
+// component type, calling the tick method for each component
+#define ECS_TICK_COMPONENT(_name)                                       \
+    for (size_t i = 0; i < manager->_name->length; i++) {               \
+        ecs_##_name##_tick(dynarray_get(manager->_name, i));            \
+    }
+
 typedef struct {
     // the entity component lists that any entity can use
     DynArray *position;

@@ -19,6 +19,8 @@
 
 #include <cglm/cglm.h>
 
+#define TPS 40
+
 void init_glfw(void) {
     // initialize glfw
     glfwInit();
@@ -71,6 +73,8 @@ void mouse_callback(GLFWwindow *win, double xpos, double ypos) {
 }
 
 int main(void) {
+    const double TICK_SPEED = 1.0 / TPS;
+
     init_glfw();
 
     Window win;
@@ -91,9 +95,8 @@ int main(void) {
     glfwSetCursorPosCallback(win.window, mouse_callback);
     glfwSwapInterval(0);
 
-    // fps timer
+    // gametick timer
     double last_time = glfwGetTime();
-    int frames = 0;
 
     shader_use(&state->shaders[0]);
     shader_setmat4(&state->shaders[0], "proj", cam->proj);
@@ -119,23 +122,21 @@ int main(void) {
         glfwSwapBuffers(win.window);
         glfwPollEvents();
 
-        // render time
-        frames++;
+        // update the physics engine
         double current_time = glfwGetTime();
-        if (current_time - last_time >= 1.0) {
-            char buffer[64];
-            sprintf(buffer, "Render time: %fms", 1000.0 / (float)frames);
-            log_info(buffer);
+        if (current_time - last_time >= TICK_SPEED) {
+            // update the ECS
+            ecs_update(state->ecs);
+
+            // update the world
+            world_update(state->world);
+
             last_time = current_time;
-            frames = 0;
         }
 
         if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             break;
         }
-
-        // update the ECS
-        ecs_update(state->ecs);
     }
 
     gamestate_free();

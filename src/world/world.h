@@ -7,8 +7,12 @@
 #include "chunk.h"
 
 #include "../core/mesh.h"
+#include "../core/dynarray.h"
 
 #include "../common/types.h"
+
+#include "../entity/entity.h"
+#include "../entity/ecs.h"
 
 #define WORLD_X 8
 #define WORLD_Y 1
@@ -27,6 +31,13 @@ typedef struct {
 
     // the depth of the world
     i32 depth;
+
+    // the coordinates of the central chunk
+    i64 centre[3];
+
+    // the component storing the players current position in the world along
+    // with chunk coordinates
+    ECSposition *player_pos;
 } World;
 
 // creates a new world with a list of chunks which has a size that is controlled
@@ -38,6 +49,9 @@ void world_generate(World*);
 
 // renders the world to the screen by drawing each chunk's mesh
 void world_render(World*);
+
+// updates the world based on the position of the player
+void world_update(World*);
 
 // frees all data allocated to the world (including chunks)
 void world_free(World*);

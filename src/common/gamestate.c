@@ -42,7 +42,18 @@ void gamestate_init(char *block_atlas_dir,
 
     // create the player entity
     log_info("Creating the player entity");
-    state->player = ecs_create_entity(state->ecs, (ECSType[]) { CAMERA }, 1);
+    state->player = ecs_create_entity(state->ecs,
+        (ECSType[]) {
+            CAMERA,
+            POSITION
+        }, 2);
+    ECSposition *pos = dynarray_get(
+        state->ecs->position, ecs_get_component_id(state->player, POSITION));
+    ECScamera *cam = dynarray_get(
+        state->ecs->camera, ecs_get_component_id(state->player, CAMERA));
+
+    camera_init(&cam->cam, &pos->pos);
+    state->world->player_pos = pos;
 }
 
 void gamestate_free(void) {

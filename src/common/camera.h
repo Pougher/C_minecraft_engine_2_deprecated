@@ -18,8 +18,10 @@
     glm_vec3_scale(CAMERA_RESULT, speed, CAMERA_RESULT)
 
 typedef struct {
-    // the position of the camera, the front, and the up vectors
-    vec3 pos;
+    // pointer to the position of the camera
+    vec3 *pos;
+
+    // the front and up vectors of the camera
     vec3 front;
     vec3 up;
 
@@ -41,8 +43,9 @@ typedef struct {
     f32 pitch;
 } Camera;
 
-// initializes a camera, initializing pos to the vector passed to the function
-void camera_init(Camera*, vec3);
+// initializes a camera, initializing pos to the vector pointer passed to the
+// function
+void camera_init(Camera*, vec3*);
 
 // updates the camera with the opengl context
 void camera_update(Camera*, GLFWwindow*);

@@ -1,7 +1,11 @@
 #include "ecs_position.h"
 
 void ecs_position_init(ECSposition *component) {
-    component->x = 0;
-    component->y = 0;
-    component->z = 0;
+    glm_vec3_copy(component->pos, (vec3) { 0, 0, 0 });
+}
+
+void ecs_position_tick(ECSposition *component) {
+    component->chunk_x = (i64)(component->pos[0] / CHUNK_X);
+    component->chunk_y = (i64)(component->pos[1] / CHUNK_Y);
+    component->chunk_z = (i64)(component->pos[2] / CHUNK_Z);
 }

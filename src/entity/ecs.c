@@ -59,7 +59,7 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
 }
 
 void ecs_update(ECSManager *manager) {
-    (void) manager;
+    ECS_TICK_COMPONENT(position);
 }
 
 u64 ecs_get_component_id(Entity *entity, u64 id) {

@@ -3,16 +3,19 @@
 // updates the camera's view matrix
 static void camera_compute_view_matrix(Camera *cam) {
     vec3 temp;
-    glm_vec3_add(cam->pos, cam->front, temp);
+    glm_vec3_add(*cam->pos, cam->front, temp);
     glm_lookat(
-        cam->pos,
+        *cam->pos,
         temp,
         cam->up,
         cam->view);
 }
 
-void camera_init(Camera *cam, vec3 pos) {
-    glm_vec3_copy(pos, cam->pos);
+void camera_init(Camera *cam, vec3 *pos) {
+    printf("aa\n");
+    cam->pos = pos;
+    printf("%p\n", (void*)cam->pos);
+    //printf("%f %f %f\n", *(cam->pos)[0], *(cam->pos)[1], *(cam->pos)[2]);
 
     // set the front of the camera and the up vector
     glm_vec3_copy((vec3) { 0.0f, 0.0f, -1.0f }, cam->front);
@@ -43,19 +46,19 @@ void camera_update(Camera *cam, GLFWwindow *win) {
     static const f32 speed = 0.1f;
     if (glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS) {
         CAMERA_SPEEDFW;
-        glm_vec3_add(cam->pos, CAMERA_RESULT, cam->pos);
+        glm_vec3_add(*cam->pos, CAMERA_RESULT, *cam->pos);
     }
     if (glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS) {
         CAMERA_SPEEDFW;
-        glm_vec3_sub(cam->pos, CAMERA_RESULT, cam->pos);
+        glm_vec3_sub(*cam->pos, CAMERA_RESULT, *cam->pos);
     }
     if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) {
         CAMERA_SPEEDLR;
-        glm_vec3_sub(cam->pos, CAMERA_RESULT, cam->pos);
+        glm_vec3_sub(*cam->pos, CAMERA_RESULT, *cam->pos);
     }
     if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) {
         CAMERA_SPEEDLR;
-        glm_vec3_add(cam->pos, CAMERA_RESULT, cam->pos);
+        glm_vec3_add(*cam->pos, CAMERA_RESULT, *cam->pos);
     }
     camera_compute_view_matrix(cam);
 }

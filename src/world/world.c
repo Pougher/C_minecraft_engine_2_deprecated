@@ -1,4 +1,5 @@
 #include "world.h"
+#include "../common/gamestate.h"
 
 World *world_new(void) {
     World *world = malloc(sizeof(World));
@@ -25,6 +26,9 @@ World *world_new(void) {
         }
     }
 
+    world->centre[0] = 0;
+    world->centre[1] = 0;
+    world->centre[2] = 0;
 
     return world;
 }
@@ -52,6 +56,39 @@ void world_render(World *world) {
     // after the first solid geometry pass, render the translucent geometry
     for (i32 i = 0; i < WORLD_AREA; i++) {
         mesh_render(world->chunks[i]->fluid_mesh);
+    }
+}
+
+void world_update(World *world) {
+    if ((world->centre[0] != world->player_pos->chunk_x)
+        != (world->centre[1] != world->player_pos->chunk_y)
+        != (world->centre[2] != world->player_pos->chunk_z)) {
+
+        int rel_chunk_x = world->centre[0] - world->player_pos->chunk_x;
+        int rel_chunk_z = world->centre[2] - world->player_pos->chunk_z;
+        printf("%d %d\n", rel_chunk_x, rel_chunk_z);
+
+        for (i16 x = 0; x < WORLD_X; x++) {
+            for (i16 y = 0; y < WORLD_Y; y++) {
+                for (i16 z = 0; z < WORLD_Z; z++) {
+                    i32 index = x + y * WORLD_X + z * (WORLD_X * WORLD_Y);
+
+                    world->chunks[index] = chunk_new(
+                        (world->centre[0] + x) * CHUNK_X,
+                        (world->centre[1] + y) * CHUNK_Y,
+                        (world->centre[2] + z) * CHUNK_Z);
+
+                    world->chunks[index]->rx = x;
+                    world->chunks[index]->ry = y;
+                    world->chunks[index]->rz = z;
+                }
+            }
+        }
+        world_generate(world);
+
+        world->centre[0] = world->player_pos->chunk_x;
+        world->centre[1] = world->player_pos->chunk_y;
+        world->centre[2] = world->player_pos->chunk_z;
     }
 }
 
