@@ -34,18 +34,18 @@ World *world_new(void) {
 }
 
 void world_generate(World *world) {
-    i64 total_vertices = 0;
+    //i64 total_vertices = 0;
 
     for (i32 i = 0; i < WORLD_X * WORLD_Y * WORLD_Z; i++) {
         chunk_generate(world->chunks[i]);
         chunk_compute_mesh(world->chunks[i]);
-        total_vertices += world->chunks[i]->solid_mesh->vertices_length;
-        total_vertices += world->chunks[i]->fluid_mesh->vertices_length;
+        //total_vertices += world->chunks[i]->solid_mesh->vertices_length;
+        //total_vertices += world->chunks[i]->fluid_mesh->vertices_length;
     }
 
-    char buf[64];
-    sprintf(buf, "World vertices count: %" PRId64, total_vertices);
-    log_info(buf);
+    //char buf[64];
+    //sprintf(buf, "World vertices count: %" PRId64, total_vertices);
+    //log_info(buf);
 }
 
 void world_render(World *world) {
@@ -61,22 +61,19 @@ void world_render(World *world) {
 
 void world_update(World *world) {
     if ((world->centre[0] != world->player_pos->chunk_x)
-        != (world->centre[1] != world->player_pos->chunk_y)
-        != (world->centre[2] != world->player_pos->chunk_z)) {
-
-        int rel_chunk_x = world->centre[0] - world->player_pos->chunk_x;
-        int rel_chunk_z = world->centre[2] - world->player_pos->chunk_z;
-        printf("%d %d\n", rel_chunk_x, rel_chunk_z);
+        || (world->centre[2] != world->player_pos->chunk_z)) {
 
         for (i16 x = 0; x < WORLD_X; x++) {
             for (i16 y = 0; y < WORLD_Y; y++) {
                 for (i16 z = 0; z < WORLD_Z; z++) {
                     i32 index = x + y * WORLD_X + z * (WORLD_X * WORLD_Y);
 
+                    chunk_free(world->chunks[index]);
+
                     world->chunks[index] = chunk_new(
-                        (world->centre[0] + x) * CHUNK_X,
-                        (world->centre[1] + y) * CHUNK_Y,
-                        (world->centre[2] + z) * CHUNK_Z);
+                        (world->centre[0] - (WORLD_X / 2) + x) * CHUNK_X,
+                        y * CHUNK_Y,
+                        (world->centre[2] - (WORLD_Z / 2) + z) * CHUNK_Z);
 
                     world->chunks[index]->rx = x;
                     world->chunks[index]->ry = y;

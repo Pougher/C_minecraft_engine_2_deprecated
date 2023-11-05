@@ -14,9 +14,9 @@
 #include "../entity/entity.h"
 #include "../entity/ecs.h"
 
-#define WORLD_X 8
+#define WORLD_X 9
 #define WORLD_Y 1
-#define WORLD_Z 8
+#define WORLD_Z 9
 #define WORLD_AREA WORLD_X * WORLD_Y * WORLD_Z
 
 typedef struct {
