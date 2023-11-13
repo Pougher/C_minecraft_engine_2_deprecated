@@ -96,7 +96,10 @@ int main(void) {
     glfwSwapInterval(0);
 
     // gametick timer
-    double last_time = glfwGetTime();
+    double last_time = glfwGetTime(); 
+
+    double frame_last_time = glfwGetTime();
+    int frames = 0;
 
     shader_use(&state->shaders[0]);
     shader_setmat4(&state->shaders[0], "proj", cam->proj);
@@ -132,6 +135,15 @@ int main(void) {
             world_update(state->world);
 
             last_time = current_time;
+        }
+
+        current_time = glfwGetTime();
+        frames++;
+        if (current_time - frame_last_time >= 1.0) {
+            // printf and reset timer
+            printf("Frames: %D\n", frames);
+            frames = 0;
+            frame_last_time += 1.0;
         }
 
         if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
