@@ -100,7 +100,7 @@ ArrayTexture *array_texture_from_data(unsigned char *data,
         case GL_RGBA: { new_texture->channels = 4; break; }
         default: {
             log_error(
-                "Unsupported format passed to texture_empty");
+                "Unsupported format passed to array_texture_empty");
             break;
         }
     }

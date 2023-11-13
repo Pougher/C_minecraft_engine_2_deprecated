@@ -47,6 +47,7 @@ void gamestate_init(char *block_atlas_dir,
             CAMERA,
             POSITION
         }, 2);
+
     ECSposition *pos = dynarray_get(
         state->ecs->position, ecs_get_component_id(state->player, POSITION));
     ECScamera *cam = dynarray_get(

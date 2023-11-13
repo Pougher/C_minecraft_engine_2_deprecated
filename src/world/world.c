@@ -15,9 +15,9 @@ World *world_new(void) {
                 i32 index = x + y * WORLD_X + z * (WORLD_X * WORLD_Y);
 
                 world->chunks[index] = chunk_new(
-                    (x - WORLD_X / 2) * CHUNK_X,
-                    (y - WORLD_Y / 2) * CHUNK_Y,
-                    (z - WORLD_Z / 2) * CHUNK_Z);
+                    x * CHUNK_X,
+                    y * CHUNK_Y,
+                    z * CHUNK_Z);
 
                 world->chunks[index]->rx = x;
                 world->chunks[index]->ry = y;
@@ -34,18 +34,10 @@ World *world_new(void) {
 }
 
 void world_generate(World *world) {
-    //i64 total_vertices = 0;
-
     for (i32 i = 0; i < WORLD_X * WORLD_Y * WORLD_Z; i++) {
         chunk_generate(world->chunks[i]);
         chunk_compute_mesh(world->chunks[i]);
-        //total_vertices += world->chunks[i]->solid_mesh->vertices_length;
-        //total_vertices += world->chunks[i]->fluid_mesh->vertices_length;
     }
-
-    //char buf[64];
-    //sprintf(buf, "World vertices count: %" PRId64, total_vertices);
-    //log_info(buf);
 }
 
 void world_render(World *world) {
@@ -63,6 +55,46 @@ void world_update(World *world) {
     if ((world->centre[0] != world->player_pos->chunk_x)
         || (world->centre[2] != world->player_pos->chunk_z)) {
 
+        const int offset_x = world->centre[0] - world->player_pos->chunk_x;
+        //const int offset_z = world->centre[2] - world->player_pos->chunk_z;
+
+        if (offset_x == 1) {
+            for (int i = WORLD_AREA - WORLD_X; i < WORLD_AREA; i++) {
+                chunk_free(world->chunks[i]);
+                world->chunks[i] = NULL;
+            }
+            memmove((char*)world->chunks + (WORLD_X * sizeof(Chunk*)),
+                (char*)world->chunks,
+                (WORLD_AREA - WORLD_X) * sizeof(Chunk*));
+            for (int i = 0; i < WORLD_X; i++) {
+                world->chunks[i] = chunk_new(
+                    world->centre[0] * CHUNK_X,
+                    0,
+                    (world->centre[2] - 1 + i) * CHUNK_Z);
+                chunk_generate(world->chunks[i]);
+                chunk_compute_mesh(world->chunks[i]);
+            }
+        }
+
+        if (offset_x == -1) {
+            for (int i = 0; i < WORLD_X; i++) {
+                chunk_free(world->chunks[i]);
+                world->chunks[i] = NULL;
+            }
+            memmove((char*)world->chunks,
+                (char*)world->chunks + WORLD_X * sizeof(Chunk*),
+                (WORLD_AREA - WORLD_X) * sizeof(Chunk*));
+            for (int i = 0; i < WORLD_X; i++) {
+                world->chunks[i + (WORLD_AREA - WORLD_X)] = chunk_new(
+                    (world->centre[0] - 1) * CHUNK_X,
+                    0,
+                    (world->centre[2] - 1 + i) * CHUNK_Z);
+                chunk_generate(world->chunks[i + (WORLD_AREA - WORLD_X)]);
+                chunk_compute_mesh(world->chunks[i + (WORLD_AREA - WORLD_X)]);
+            }
+        }
+
+        /*
         for (i16 x = 0; x < WORLD_X; x++) {
             for (i16 y = 0; y < WORLD_Y; y++) {
                 for (i16 z = 0; z < WORLD_Z; z++) {
@@ -81,7 +113,7 @@ void world_update(World *world) {
                 }
             }
         }
-        world_generate(world);
+        world_generate(world);*/
 
         world->centre[0] = world->player_pos->chunk_x;
         world->centre[1] = world->player_pos->chunk_y;

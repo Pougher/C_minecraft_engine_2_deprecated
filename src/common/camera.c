@@ -12,10 +12,7 @@ static void camera_compute_view_matrix(Camera *cam) {
 }
 
 void camera_init(Camera *cam, vec3 *pos) {
-    printf("aa\n");
     cam->pos = pos;
-    printf("%p\n", (void*)cam->pos);
-    //printf("%f %f %f\n", *(cam->pos)[0], *(cam->pos)[1], *(cam->pos)[2]);
 
     // set the front of the camera and the up vector
     glm_vec3_copy((vec3) { 0.0f, 0.0f, -1.0f }, cam->front);
