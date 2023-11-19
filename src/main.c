@@ -111,6 +111,8 @@ int main(void) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, state->block_atlas->atlas->id);
 
+    state->delta = 0.05f;
+
     while (!glfwWindowShouldClose(win.window)) {
         glClearColor(0.509, 0.674, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -140,8 +142,9 @@ int main(void) {
         current_time = glfwGetTime();
         frames++;
         if (current_time - frame_last_time >= 1.0) {
-            // printf and reset timer
-            printf("Frames: %D\n", frames);
+            char buffer[64];
+            sprintf(buffer, "%d FPS", frames);
+            log_info(buffer);
             frames = 0;
             frame_last_time += 1.0;
         }

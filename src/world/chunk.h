@@ -44,19 +44,14 @@ typedef struct {
     // index into the array has to be mathematically calculated
     BlockType *blocks;
 
-    // the x location of the chunk
-    i64 x;
+    // the coordinates of the chunk in world space
+    i64 x, y, z;
 
-    // the y location of the chunk
-    i64 y;
+    // the position of the chunk in chunk space
+    i64 cx, cy, cz;
 
-    // the z location of the chunk
-    i64 z;
-
-    // the relative location of the chunk to the rest of the world
-    i16 rx;
-    i16 ry;
-    i16 rz;
+    // wether the chunk should be deleted
+    bool unloadable;
 } Chunk;
 
 // creates a new chunk at an x and y coordinate. Automatically allocates the

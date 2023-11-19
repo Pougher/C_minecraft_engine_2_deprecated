@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <assert.h>
 
 #include "chunk.h"
 
@@ -14,10 +16,10 @@
 #include "../entity/entity.h"
 #include "../entity/ecs.h"
 
-#define WORLD_X 9
+#define WORLD_X 11
 #define WORLD_Y 1
-#define WORLD_Z 9
-#define WORLD_AREA WORLD_X * WORLD_Y * WORLD_Z
+#define WORLD_Z 11
+#define WORLD_AREA (WORLD_X * WORLD_Y * WORLD_Z)
 
 typedef struct {
     // the chunks that make up the world

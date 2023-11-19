@@ -41,6 +41,9 @@ struct GameState {
 
     // the number of allocated shaders
     i32 num_shaders;
+
+    // the time passed between two frames, helps keep track of timings
+    float delta;
 };
 
 extern struct GameState *state;

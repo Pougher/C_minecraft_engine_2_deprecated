@@ -35,6 +35,10 @@ Chunk *chunk_new(i64 x, i64 y, i64 z) {
     chunk->y = y;
     chunk->z = z;
 
+    chunk->cx = x / CHUNK_X;
+    chunk->cy = y / CHUNK_Y;
+    chunk->cz = z / CHUNK_Z;
+
     return chunk;
 }
 

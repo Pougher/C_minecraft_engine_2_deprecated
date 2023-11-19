@@ -18,10 +18,6 @@ World *world_new(void) {
                     x * CHUNK_X,
                     y * CHUNK_Y,
                     z * CHUNK_Z);
-
-                world->chunks[index]->rx = x;
-                world->chunks[index]->ry = y;
-                world->chunks[index]->rz = z;
             }
         }
     }
@@ -29,6 +25,10 @@ World *world_new(void) {
     world->centre[0] = 0;
     world->centre[1] = 0;
     world->centre[2] = 0;
+
+    // prevent a crash due to improper world sizing
+    assert((WORLD_X % 2 != 0) && (WORLD_Z % 2 != 0) &&
+        "World size cannot be a multiple of 2");
 
     return world;
 }
@@ -51,73 +51,60 @@ void world_render(World *world) {
     }
 }
 
+// inline function to detect if a chunk is in bounds of the world at the current
+// centre position
+static inline bool world_chunk_in_bounds(World *world, i64 x, i64 y) {
+    return llabs(x - world->centre[0]) <= (WORLD_X / 2) &&
+        llabs(y - world->centre[2]) <= (WORLD_X / 2);
+}
+
+// gets the chunk index from a given chunk location
+static inline size_t world_chunk_offset(World *world, i64 x, i64 z) {
+    return (x - (world->centre[0] - WORLD_X / 2)) +
+        WORLD_X * (z - (world->centre[2] - WORLD_X / 2));
+}
+
 void world_update(World *world) {
     if ((world->centre[0] != world->player_pos->chunk_x)
         || (world->centre[2] != world->player_pos->chunk_z)) {
+        // temporary storage of player x and y variables so I dont have to type
+        // them out every single time
+        const float px = world->player_pos->chunk_x;
+        const float pz = world->player_pos->chunk_z;
 
-        const int offset_x = world->centre[0] - world->player_pos->chunk_x;
-        //const int offset_z = world->centre[2] - world->player_pos->chunk_z;
+        world->centre[0] = px;
+        world->centre[2] = pz;
 
-        if (offset_x == 1) {
-            for (int i = WORLD_AREA - WORLD_X; i < WORLD_AREA; i++) {
-                chunk_free(world->chunks[i]);
-                world->chunks[i] = NULL;
+        // create a chunk backup
+        Chunk *old[WORLD_AREA];
+        memcpy(old, world->chunks, WORLD_AREA * sizeof(Chunk*));
+
+        // Set world to unloaded chunks
+        memset(world->chunks, 0, WORLD_AREA * sizeof(Chunk*));
+
+        // place only in bounds chunks in to the new array
+        for (size_t i = 0; i < WORLD_AREA; i++) {
+            Chunk *chunk = old[i];
+            if (chunk == NULL) {
+                continue;
+            } else if (world_chunk_in_bounds(world, chunk->cx, chunk->cz)) {
+                world->chunks[world_chunk_offset(world, chunk->cx, chunk->cz)] =
+                    chunk;
+                continue;
             }
-            memmove((char*)world->chunks + (WORLD_X * sizeof(Chunk*)),
-                (char*)world->chunks,
-                (WORLD_AREA - WORLD_X) * sizeof(Chunk*));
-            for (int i = 0; i < WORLD_X; i++) {
-                world->chunks[i] = chunk_new(
-                    world->centre[0] * CHUNK_X,
-                    0,
-                    (world->centre[2] - 1 + i) * CHUNK_Z);
+            chunk_free(chunk);
+        }
+
+        // generate all of the missing chunks
+        for (size_t i = 0; i < WORLD_AREA; i++) {
+            if (world->chunks[i] == 0) {
+                int x = world->centre[0] + (i % WORLD_X) - (WORLD_X / 2);
+                int z = world->centre[2] + (i / WORLD_X) - (WORLD_Z / 2);
+                world->chunks[i] = chunk_new(x * CHUNK_X, 0, z * CHUNK_Z);
                 chunk_generate(world->chunks[i]);
                 chunk_compute_mesh(world->chunks[i]);
             }
         }
-
-        if (offset_x == -1) {
-            for (int i = 0; i < WORLD_X; i++) {
-                chunk_free(world->chunks[i]);
-                world->chunks[i] = NULL;
-            }
-            memmove((char*)world->chunks,
-                (char*)world->chunks + WORLD_X * sizeof(Chunk*),
-                (WORLD_AREA - WORLD_X) * sizeof(Chunk*));
-            for (int i = 0; i < WORLD_X; i++) {
-                world->chunks[i + (WORLD_AREA - WORLD_X)] = chunk_new(
-                    (world->centre[0] - 1) * CHUNK_X,
-                    0,
-                    (world->centre[2] - 1 + i) * CHUNK_Z);
-                chunk_generate(world->chunks[i + (WORLD_AREA - WORLD_X)]);
-                chunk_compute_mesh(world->chunks[i + (WORLD_AREA - WORLD_X)]);
-            }
-        }
-
-        /*
-        for (i16 x = 0; x < WORLD_X; x++) {
-            for (i16 y = 0; y < WORLD_Y; y++) {
-                for (i16 z = 0; z < WORLD_Z; z++) {
-                    i32 index = x + y * WORLD_X + z * (WORLD_X * WORLD_Y);
-
-                    chunk_free(world->chunks[index]);
-
-                    world->chunks[index] = chunk_new(
-                        (world->centre[0] - (WORLD_X / 2) + x) * CHUNK_X,
-                        y * CHUNK_Y,
-                        (world->centre[2] - (WORLD_Z / 2) + z) * CHUNK_Z);
-
-                    world->chunks[index]->rx = x;
-                    world->chunks[index]->ry = y;
-                    world->chunks[index]->rz = z;
-                }
-            }
-        }
-        world_generate(world);*/
-
-        world->centre[0] = world->player_pos->chunk_x;
-        world->centre[1] = world->player_pos->chunk_y;
-        world->centre[2] = world->player_pos->chunk_z;
     }
 }
 

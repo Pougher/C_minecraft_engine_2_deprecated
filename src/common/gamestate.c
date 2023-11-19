@@ -54,6 +54,7 @@ void gamestate_init(char *block_atlas_dir,
         state->ecs->camera, ecs_get_component_id(state->player, CAMERA));
 
     camera_init(&cam->cam, &pos->pos);
+    glm_vec3_copy((vec3) { WORLD_X * CHUNK_X / 2, 70, WORLD_Z * CHUNK_Z / 2 }, pos->pos);
     state->world->player_pos = pos;
 }
 
