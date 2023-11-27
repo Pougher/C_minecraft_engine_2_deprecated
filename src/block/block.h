@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <cglm/cglm.h>
 
+#include "../common/log.h"
+
 // 16x16 pixel blocks
 #define BLOCK_SIZE 16
 
@@ -94,6 +96,12 @@ typedef struct {
 #define BLOCK_DECL(name)           \
     extern void name##_init(void); \
     name##_init()
+
+// macro to create a case statement for printing a blocks name from its ID
+#define BLOCK_LOG_ID(id) case id: { log_info(#id); break; }
+
+// prints the name of a block from its ID
+void block_print_name(BlockType);
 
 // function to initialize an array of blocks
 void block_init(void);

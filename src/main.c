@@ -12,6 +12,7 @@
 #include "world/chunk.h"
 #include "world/world.h"
 #include "core/mesh.h"
+#include "core/timer.h"
 
 #include "render/grid_atlas.h"
 
@@ -96,10 +97,21 @@ int main(void) {
     glfwSwapInterval(0);
 
     // gametick timer
-    double last_time = glfwGetTime(); 
+    Timer gametick = {
+        .interval = TICK_SPEED,
+        .last_time = 0
+    };
 
-    double frame_last_time = glfwGetTime();
+    // FPS timer
+    Timer fps = {
+        .interval = 1.0,
+        .last_time = 0
+    };
+
     int frames = 0;
+
+    // for calculating delta time
+    double start_frame = 0;
 
     shader_use(&state->shaders[0]);
     shader_setmat4(&state->shaders[0], "proj", cam->proj);
@@ -111,9 +123,9 @@ int main(void) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, state->block_atlas->atlas->id);
 
-    state->delta = 0.05f;
-
     while (!glfwWindowShouldClose(win.window)) {
+        start_frame = glfwGetTime();
+
         glClearColor(0.509, 0.674, 1, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -127,26 +139,23 @@ int main(void) {
         glfwSwapBuffers(win.window);
         glfwPollEvents();
 
+        state->delta = glfwGetTime() - start_frame;
+
         // update the physics engine
-        double current_time = glfwGetTime();
-        if (current_time - last_time >= TICK_SPEED) {
+        if (timer_ready(&gametick)) {
             // update the ECS
             ecs_update(state->ecs);
 
             // update the world
             world_update(state->world);
-
-            last_time = current_time;
         }
 
-        current_time = glfwGetTime();
         frames++;
-        if (current_time - frame_last_time >= 1.0) {
+        if (timer_ready(&fps)) {
             char buffer[64];
             sprintf(buffer, "%d FPS", frames);
             log_info(buffer);
             frames = 0;
-            frame_last_time += 1.0;
         }
 
         if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {

@@ -4,6 +4,7 @@ ECSManager *ecs_new(void) {
     ECSManager *manager = malloc(sizeof(ECSManager));
     manager->id = 0;
 
+    ECS_COMPONENT(blockbreak);
     ECS_COMPONENT(position);
     ECS_COMPONENT(camera);
 
@@ -33,6 +34,12 @@ Entity *ecs_create_entity(ECSManager *manager,
                 entity->components[CAMERA] = manager->camera->length - 1;
                 break;
             }
+            case BLOCKBREAK: {
+                ECS_ADD_COMPONENT(blockbreak);
+                entity->components[BLOCKBREAK] =
+                    manager->blockbreak->length - 1;
+                break;
+            }
             default: {
                 char buf[128];
                 sprintf(buf, "Cannot construct ecs component %d as it is not "
@@ -50,6 +57,7 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
     for (size_t i = 0; i < TOTAL_COMPONENTS; i++) {
         if (entity->components[i] != ECS_EMPTY) {
             switch (i) {
+                ECS_DELETE(BLOCKBREAK, blockbreak);
                 ECS_DELETE(POSITION, position);
                 ECS_DELETE(CAMERA, camera);
             }
@@ -59,6 +67,8 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
 }
 
 void ecs_update(ECSManager *manager) {
+    ECS_TICK_COMPONENT(blockbreak);
+    ECS_TICK_COMPONENT(camera);
     ECS_TICK_COMPONENT(position);
 }
 
@@ -68,5 +78,7 @@ u64 ecs_get_component_id(Entity *entity, u64 id) {
 
 void ecs_free(ECSManager *manager) {
     ECS_COMPONENT_FREE(position);
+    ECS_COMPONENT_FREE(camera);
+    ECS_COMPONENT_FREE(blockbreak);
     free(manager);
 }

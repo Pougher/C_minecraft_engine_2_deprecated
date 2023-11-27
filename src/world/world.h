@@ -8,6 +8,8 @@
 
 #include "chunk.h"
 
+#include "../block/block.h"
+
 #include "../core/mesh.h"
 #include "../core/dynarray.h"
 
@@ -48,6 +50,12 @@ World *world_new(void);
 
 // generates the world
 void world_generate(World*);
+
+// gets a block at specific coordinates
+BlockType world_get_block(World*, f64, f64, f64);
+
+// sets a block in the world at any position
+void world_set_block(World*, f64, f64, f64, BlockType);
 
 // renders the world to the screen by drawing each chunk's mesh
 void world_render(World*);

@@ -9,3 +9,19 @@ void block_init(void) {
     BLOCK_DECL(water);
     BLOCK_DECL(bedrock);
 }
+
+void block_print_name(BlockType id) {
+    switch(id) {
+        BLOCK_LOG_ID(DIRT);
+        BLOCK_LOG_ID(GRASS);
+        BLOCK_LOG_ID(AIR);
+        BLOCK_LOG_ID(STONE);
+        BLOCK_LOG_ID(SAND);
+        BLOCK_LOG_ID(WATER);
+        BLOCK_LOG_ID(BEDROCK);
+        default: {
+            log_warning("Block ID not known");
+            break;
+        }
+    }
+}

@@ -24,7 +24,6 @@ void camera_init(Camera *cam, vec3 *pos) {
     glm_perspective(glm_rad(80), 1.66666f, 0.1f, 1000.0f, cam->proj);
 
     glm_mat4_identity(cam->model);
-    glm_translate(cam->model, (vec3) { 0.0f, 0.0f, -10.0f });
 
     // calculate the cameras view matrix
     camera_compute_view_matrix(cam);
@@ -41,7 +40,7 @@ void camera_init(Camera *cam, vec3 *pos) {
 }
 
 void camera_update(Camera *cam, GLFWwindow *win) {
-    const f32 speed = 5.0f * state->delta;
+    const f32 speed = 15.0f * state->delta;
     if (glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS) {
         CAMERA_SPEEDFW;
         glm_vec3_add(*cam->pos, CAMERA_RESULT, *cam->pos);

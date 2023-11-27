@@ -111,8 +111,8 @@ void chunk_generate(Chunk *chunk) {
 
     for (i32 x = 0; x < CHUNK_OVERSCAN_X; x++) {
         for (i32 z = 0; z < CHUNK_OVERSCAN_Z; z++) {
-            f64 ax = x + chunk->x - 1;
-            f64 az = z + chunk->z - 1;
+            f64 ax = x + chunk->x - CHUNK_OVERSCAN;
+            f64 az = z + chunk->z - CHUNK_OVERSCAN;
 
             f64 v = chunk_octave_noise(ctx, 4, ax, az, 0.01, 1, 0.5, 2.0);
             int val = ((v + 1.0) / 2) * (CHUNK_Y / 3) + 30;
@@ -147,9 +147,9 @@ void chunk_compute_mesh(Chunk *chunk) {
     mesh_reset(chunk->fluid_mesh);
     mesh_reset(chunk->solid_mesh);
 
-    for (i32 x = 1; x < CHUNK_OVERSCAN_X - 1; x++) {
-        for (i32 y = 1; y < CHUNK_OVERSCAN_Y - 1; y++) {
-            for (i32 z = 1; z < CHUNK_OVERSCAN_Z - 1; z++) {
+    for (i32 x = CHUNK_OVERSCAN; x < CHUNK_OVERSCAN_X - CHUNK_OVERSCAN; x++) {
+        for (i32 y = CHUNK_OVERSCAN; y < CHUNK_OVERSCAN_Y - CHUNK_OVERSCAN; y++) {
+            for (i32 z = CHUNK_OVERSCAN; z < CHUNK_OVERSCAN_Z - CHUNK_OVERSCAN; z++) {
                 i32 i = x + (y * CHUNK_OVERSCAN_X)
                     + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
                 // if the block is air, dont bother to do any other
@@ -248,6 +248,23 @@ BlockType chunk_get_block(Chunk *chunk, i32 x, i32 y, i32 z) {
     i32 index = x + (y * CHUNK_OVERSCAN_X)
         + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
     return chunk->blocks[index];
+}
+
+BlockType chunk_get_block_offset(Chunk *chunk, i32 x, i32 y, i32 z) {
+    if (x < 0 ||
+        y < 0 ||
+        z < 0 ||
+        x >= CHUNK_X ||
+        y >= CHUNK_Y ||
+        z >= CHUNK_Z) {
+        return AIR;
+    }
+    size_t index = chunk_compute_index(x, y, z);
+    return chunk->blocks[index];
+}
+
+size_t chunk_compute_index(i32 x, i32 y, i32 z) {
+    return x + y * CHUNK_OVERSCAN_X + z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y;
 }
 
 void chunk_free(Chunk *chunk) {

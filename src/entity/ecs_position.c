@@ -8,4 +8,7 @@ void ecs_position_tick(ECSposition *component) {
     component->chunk_x = (i64)(component->pos[0] / CHUNK_X);
     component->chunk_y = (i64)(component->pos[1] / CHUNK_Y);
     component->chunk_z = (i64)(component->pos[2] / CHUNK_Z);
+
+    if (component->pos[0] < 0) component->chunk_x -= 1;
+    if (component->pos[2] < 0) component->chunk_z -= 1;
 }

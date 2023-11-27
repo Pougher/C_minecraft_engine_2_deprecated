@@ -19,9 +19,11 @@
 #define CHUNK_Y 128
 #define CHUNK_Z 32
 
-#define CHUNK_OVERSCAN_X (CHUNK_X + 2)
-#define CHUNK_OVERSCAN_Y (CHUNK_Y + 2)
-#define CHUNK_OVERSCAN_Z (CHUNK_Z + 2)
+#define CHUNK_OVERSCAN 1
+
+#define CHUNK_OVERSCAN_X (CHUNK_X + 2 * CHUNK_OVERSCAN)
+#define CHUNK_OVERSCAN_Y (CHUNK_Y + 2 * CHUNK_OVERSCAN)
+#define CHUNK_OVERSCAN_Z (CHUNK_Z + 2 * CHUNK_OVERSCAN)
 
 #define TO_INDEX(x, y, z) z + CHUNK_Z * (y + CHUNK_Y * x)
 
@@ -69,5 +71,13 @@ void chunk_compute_mesh(Chunk*);
 
 // gets a block from a chunk at an (x, y, z) coordinate
 BlockType chunk_get_block(Chunk*, i32, i32, i32);
+
+// returns the index into the chunk's data of the block in the relative
+// (x, y, z) coordinate
+size_t chunk_compute_index(i32, i32, i32);
+
+// gets a block from a chunk at an (x, y, z) coordinate while correcting for
+// the overscan offset
+BlockType chunk_get_block_offset(Chunk*, i32, i32, i32);
 
 #endif

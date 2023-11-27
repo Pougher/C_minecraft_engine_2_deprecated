@@ -45,16 +45,27 @@ void gamestate_init(char *block_atlas_dir,
     state->player = ecs_create_entity(state->ecs,
         (ECSType[]) {
             CAMERA,
-            POSITION
-        }, 2);
+            POSITION,
+            BLOCKBREAK
+        }, 3);
 
     ECSposition *pos = dynarray_get(
         state->ecs->position, ecs_get_component_id(state->player, POSITION));
     ECScamera *cam = dynarray_get(
         state->ecs->camera, ecs_get_component_id(state->player, CAMERA));
+    ECSblockbreak *bb = dynarray_get(
+        state->ecs->blockbreak,
+        ecs_get_component_id(state->player, BLOCKBREAK));
+
+    bb->cam = cam;
+    bb->pos = &pos->pos;
+
+    glm_vec3_copy((vec3) { 0.0f, 0.0f, 0.0f }, cam->direction);
 
     camera_init(&cam->cam, &pos->pos);
-    glm_vec3_copy((vec3) { WORLD_X * CHUNK_X / 2, 70, WORLD_Z * CHUNK_Z / 2 }, pos->pos);
+    // centre the player
+    glm_vec3_copy((vec3)
+        { WORLD_X * CHUNK_X / 2, 70, WORLD_Z * CHUNK_Z / 2 }, pos->pos);
     state->world->player_pos = pos;
 }
 

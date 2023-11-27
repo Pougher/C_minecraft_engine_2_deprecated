@@ -15,6 +15,7 @@
 
 #include "ecs_position.h"
 #include "ecs_camera.h"
+#include "ecs_block_break.h"
 
 // macro to generate memory allocations for dynamic arrays containing entity
 // components
@@ -56,6 +57,7 @@ typedef struct {
     // the entity component lists that any entity can use
     DynArray *position;
     DynArray *camera;
+    DynArray *blockbreak;
 
     // the highest ID of the previously allocated entity
     u64 id;

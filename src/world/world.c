@@ -40,6 +40,55 @@ void world_generate(World *world) {
     }
 }
 
+// gets the chunk index from a given chunk location
+static inline size_t world_chunk_offset(World *world, i64 x, i64 z) {
+    return (x - (world->centre[0] - WORLD_X / 2)) +
+        WORLD_X * (z - (world->centre[2] - WORLD_X / 2));
+}
+
+BlockType world_get_block(World *world, f64 x, f64 y, f64 z) {
+    if (y >= CHUNK_Y) return AIR;
+
+    i64 cx = (i64)x / CHUNK_X;
+    i64 cz = (i64)z / CHUNK_Z;
+    if (x < 0) {
+        cx--;
+    }
+    if (z < 0) {
+        cz--;
+    }
+
+    i32 chunk_coord_x = (x < 0 ? CHUNK_X - 1 : 0) + ((i64)x % CHUNK_X);
+    i32 chunk_coord_z = (z < 0 ? CHUNK_Z - 1 : 0) + ((i64)z % CHUNK_Z);
+
+    return chunk_get_block_offset(
+        world->chunks[world_chunk_offset(world, cx, cz)],
+        chunk_coord_x,
+        y,
+        chunk_coord_z);
+}
+
+void world_set_block(World *world, f64 x, f64 y, f64 z, BlockType block) {
+    if (y >= CHUNK_Y) return;
+
+    i64 cx = (i64)x / CHUNK_X;
+    i64 cz = (i64)z / CHUNK_Z;
+    if (x < 0) {
+        cx--;
+    }
+    if (z < 0) {
+        cz--;
+    }
+
+    i32 chunk_coord_x = (x < 0 ? CHUNK_X - 1 : 0) + ((i64)x % CHUNK_X);
+    i32 chunk_coord_z = (z < 0 ? CHUNK_Z - 1 : 0) + ((i64)z % CHUNK_Z);
+
+    world->chunks[world_chunk_offset(world, cx, cz)]->blocks[
+        chunk_compute_index(chunk_coord_x, y, chunk_coord_z)] = block;
+
+    chunk_compute_mesh(world->chunks[world_chunk_offset(world, cx, cz)]);
+}
+
 void world_render(World *world) {
     for (i32 i = 0; i < WORLD_AREA; i++) {
         mesh_render(world->chunks[i]->solid_mesh);
@@ -56,12 +105,6 @@ void world_render(World *world) {
 static inline bool world_chunk_in_bounds(World *world, i64 x, i64 y) {
     return llabs(x - world->centre[0]) <= (WORLD_X / 2) &&
         llabs(y - world->centre[2]) <= (WORLD_X / 2);
-}
-
-// gets the chunk index from a given chunk location
-static inline size_t world_chunk_offset(World *world, i64 x, i64 z) {
-    return (x - (world->centre[0] - WORLD_X / 2)) +
-        WORLD_X * (z - (world->centre[2] - WORLD_X / 2));
 }
 
 void world_update(World *world) {
@@ -100,6 +143,7 @@ void world_update(World *world) {
             if (world->chunks[i] == 0) {
                 int x = world->centre[0] + (i % WORLD_X) - (WORLD_X / 2);
                 int z = world->centre[2] + (i / WORLD_X) - (WORLD_Z / 2);
+                //printf("%d %d\n", x * CHUNK_X, z * CHUNK_Z);
                 world->chunks[i] = chunk_new(x * CHUNK_X, 0, z * CHUNK_Z);
                 chunk_generate(world->chunks[i]);
                 chunk_compute_mesh(world->chunks[i]);
