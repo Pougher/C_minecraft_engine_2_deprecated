@@ -6,28 +6,30 @@ void ecs_blockbreak_init(ECSblockbreak *bb) {
     bb->pos = NULL;
 }
 
-void ecs_blockbreak_tick(ECSblockbreak *bb) {
-    Ray ray = {
-        .step = 2.0f
-    };
+void ecs_blockbreak_mouse_tick(ECSblockbreak *bb, MouseState *ms) {
+    if (ms->button == GLFW_MOUSE_BUTTON_LEFT && ms->action == GLFW_PRESS) {
+        Ray ray = {
+            .step = 1024.0f
+        };
 
-    glm_vec3_copy(bb->cam->cam.front, ray.direction);
-    glm_vec3_copy(*(bb->pos), ray.pos);
+        glm_vec3_copy(bb->cam->cam.front, ray.direction);
+        glm_vec3_copy(*(bb->pos), ray.pos);
 
-    ray_init(&ray);
+        ray_init(&ray);
 
-    BlockType id;
+        BlockType id;
 
-    for (int i = 0; i < BLOCK_REACH * 2; i++) {
-        id = world_get_block(state->world,
-            ray.pos[0],
-            ray.pos[1],
-            ray.pos[2]);
-        if (id != AIR) {
-            world_set_block(
-                state->world, ray.pos[0], ray.pos[1], ray.pos[2], AIR);
-            break;
+        for (int i = 0; i < BLOCK_REACH * 1024; i++) {
+            id = world_get_block(state->world,
+                ray.pos[0],
+                ray.pos[1],
+                ray.pos[2]);
+            if (id != AIR) {
+                world_set_block(
+                    state->world, ray.pos[0], ray.pos[1], ray.pos[2], AIR);
+                break;
+            }
+            ray_step(&ray);
         }
-        ray_step(&ray);
     }
 }

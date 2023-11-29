@@ -6,6 +6,8 @@
 
 #include "../core/dynarray.h"
 
+#include "../util/mouse_state.h"
+
 #include "../common/types.h"
 #include "../common/log.h"
 
@@ -53,6 +55,12 @@
         ecs_##_name##_tick(dynarray_get(manager->_name, i));            \
     }
 
+#define ECS_MOUSE_TICK_COMPONENT(_name)                                 \
+    for (size_t i = 0; i < manager->_name->length; i++) {               \
+        ecs_##_name##_mouse_tick(                                       \
+            dynarray_get(manager->_name, i), mouse_state);              \
+    }
+
 typedef struct {
     // the entity component lists that any entity can use
     DynArray *position;
@@ -62,6 +70,13 @@ typedef struct {
     // the highest ID of the previously allocated entity
     u64 id;
 } ECSManager;
+
+/*
+ * Note that not all components will be ticked in update or in mouse update, as
+ * some components don't require that functionality. Therefore, it would be a
+ * waste of time to update them as components if their state is not going to
+ * change.
+ */
 
 // allocates a new ECS on the stack
 ECSManager *ecs_new(void);
@@ -74,6 +89,9 @@ void ecs_delete_entity(ECSManager*, Entity*);
 
 // updates all of the components in the ECS
 void ecs_update(ECSManager*);
+
+// calls mouse event on all components that support it within the ECS
+void ecs_mouse_update(ECSManager*, MouseState*);
 
 // returns the ID of the component within the entity
 u64 ecs_get_component_id(Entity*, u64);

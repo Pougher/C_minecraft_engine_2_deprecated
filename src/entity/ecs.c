@@ -66,8 +66,11 @@ void ecs_delete_entity(ECSManager *ecs, Entity *entity) {
     free(entity);
 }
 
+void ecs_mouse_update(ECSManager *manager, MouseState *mouse_state) {
+    ECS_MOUSE_TICK_COMPONENT(blockbreak);
+}
+
 void ecs_update(ECSManager *manager) {
-    ECS_TICK_COMPONENT(blockbreak);
     ECS_TICK_COMPONENT(camera);
     ECS_TICK_COMPONENT(position);
 }

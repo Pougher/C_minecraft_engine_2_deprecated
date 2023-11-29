@@ -1,6 +1,9 @@
 #ifndef ECS_BLOCK_BREAK_H
 #define ECS_BLOCK_BREAK_H
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <cglm/cglm.h>
 
 #include <math.h>
@@ -11,6 +14,7 @@
 #include "../block/block.h"
 
 #include "../util/ray.h"
+#include "../util/mouse_state.h"
 
 #define BLOCK_REACH 5
 
@@ -34,6 +38,6 @@ typedef struct {
 void ecs_blockbreak_init(ECSblockbreak*);
 
 // ticks the block breaking test
-void ecs_blockbreak_tick(ECSblockbreak *);
+void ecs_blockbreak_mouse_tick(ECSblockbreak*, MouseState*);
 
 #endif

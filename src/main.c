@@ -20,7 +20,7 @@
 
 #include <cglm/cglm.h>
 
-#define TPS 40
+#define TPS 60
 
 void init_glfw(void) {
     // initialize glfw
@@ -73,6 +73,21 @@ void mouse_callback(GLFWwindow *win, double xpos, double ypos) {
     glm_normalize(cam->front);
 }
 
+void mouse_click_callback(GLFWwindow *window,
+    int button,
+    int action,
+    int mods) {
+    (void) window;
+
+    MouseState ms = {
+        .button = button,
+        .mods = mods,
+        .action = action
+    };
+
+    ecs_mouse_update(state->ecs, &ms);
+}
+
 int main(void) {
     const double TICK_SPEED = 1.0 / TPS;
 
@@ -94,6 +109,8 @@ int main(void) {
     glfwSetWindowUserPointer(win.window, cam);
 
     glfwSetCursorPosCallback(win.window, mouse_callback);
+    glfwSetMouseButtonCallback(win.window, mouse_click_callback);
+
     glfwSwapInterval(0);
 
     // gametick timer
