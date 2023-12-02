@@ -301,12 +301,12 @@ BlockType chunk_get_block(Chunk *chunk, i32 x, i32 y, i32 z) {
 }
 
 BlockType chunk_get_block_offset(Chunk *chunk, i32 x, i32 y, i32 z) {
-    if (x < 1 ||
-        y < 1 ||
-        z < 1 ||
-        x >= CHUNK_X ||
-        y >= CHUNK_Y ||
-        z >= CHUNK_Z) {
+    if (x < 0 ||
+        y < 0 ||
+        z < 0 ||
+        x >= CHUNK_OVERSCAN_X ||
+        y >= CHUNK_OVERSCAN_Y ||
+        z >= CHUNK_OVERSCAN_Z) {
         return AIR;
     }
     size_t index = chunk_compute_index(x, y, z);
