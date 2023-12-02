@@ -25,6 +25,9 @@
 #define CHUNK_OVERSCAN_Y (CHUNK_Y + 2 * CHUNK_OVERSCAN)
 #define CHUNK_OVERSCAN_Z (CHUNK_Z + 2 * CHUNK_OVERSCAN)
 
+// the chance that a grass block has to generate a tree
+#define CHUNK_TREE_CHANCE 70
+
 #define TO_INDEX(x, y, z) z + CHUNK_Z * (y + CHUNK_Y * x)
 
 #define BLOCK_UV_POS(dir, ind) \
@@ -41,6 +44,10 @@ typedef struct {
     // the fluid mesh of the chunk. Holds all vertex information regarding
     // translucent geometry.
     Mesh *fluid_mesh;
+
+    // the transparency mesh for transparent geometry (rendered last in the
+    // pipeline)
+    Mesh *transparent_mesh;
 
     // The block data array, holds a list of blocks in 1 dimensional form. Each
     // index into the array has to be mathematically calculated
@@ -79,5 +86,9 @@ size_t chunk_compute_index(i32, i32, i32);
 // gets a block from a chunk at an (x, y, z) coordinate while correcting for
 // the overscan offset
 BlockType chunk_get_block_offset(Chunk*, i32, i32, i32);
+
+// sets a block in a chunk. If the block is being set outside of bounds, then
+// the block will not be set.
+void chunk_set_block(Chunk*, i32, i32, i32, BlockType);
 
 #endif

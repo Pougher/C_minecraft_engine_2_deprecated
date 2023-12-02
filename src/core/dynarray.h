@@ -45,6 +45,10 @@ DynArray *dynarray_new(size_t);
 // is doubled and the data is reallocated.
 void dynarray_push(DynArray*, void*);
 
+// Same as the above function, but also updates a pointer to the index of the
+// added value with its index
+void dynarray_push_index(DynArray*, void*, size_t*);
+
 // Deletes the top value from the array
 void dynarray_pop(DynArray*);
 

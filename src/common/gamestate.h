@@ -21,6 +21,9 @@
 #include "../entity/ecs.h"
 
 struct GameState {
+    // the current OpenGL window context
+    Window *window;
+
     // the player entity
     Entity *player;
 

@@ -30,7 +30,8 @@ void dynarray_push(DynArray *arr, void *data) {
             arr->reserve_queue = realloc(arr->reserve_queue,
                 sizeof(size_t) * arr->reserve_queue_size);
             arr->reserve_queue_uses = 0;
-            printf("DYNARRAY: Reallocated reserve_queue to size %zu\n", sizeof(size_t) * arr->reserve_queue_size);
+            printf("DYNARRAY: Reallocated reserve_queue to size %zu\n",
+                sizeof(size_t) * arr->reserve_queue_size);
         }
         return;
     }
@@ -43,6 +44,44 @@ void dynarray_push(DynArray *arr, void *data) {
         (char*)arr->data + (arr->length * arr->elem_size),
         data,
         arr->elem_size);
+
+    arr->length++;
+}
+
+void dynarray_push_index(DynArray *arr, void *data, size_t *idx) {
+    if (arr->reserve_queue_size > 0) {
+        arr->reserve_queue_size--;
+        char* ptr = (char*)arr->data
+            + arr->reserve_queue[arr->reserve_queue_size] * arr->elem_size;
+        memcpy(ptr, data, arr->elem_size);
+
+        *idx = arr->reserve_queue[arr->reserve_queue_size];;
+
+        arr->reserve_queue_uses++;
+
+        // only here to prevent the reserve_queue from growing out of control
+        // and consuming too much memory
+        if (arr->reserve_queue_uses == RESERVE_QUEUE_REFRESH + 1) {
+            arr->reserve_queue = realloc(arr->reserve_queue,
+                sizeof(size_t) * arr->reserve_queue_size);
+            arr->reserve_queue_uses = 0;
+            printf("DYNARRAY: Reallocated reserve_queue to size %zu\n",
+                sizeof(size_t) * arr->reserve_queue_size);
+        }
+        return;
+    }
+
+    if (arr->length + 1 == arr->cap) {
+        arr->cap *= 2;
+        arr->data = realloc(arr->data, arr->cap * arr->elem_size);
+    }
+    memcpy(
+        (char*)arr->data + (arr->length * arr->elem_size),
+        data,
+        arr->elem_size);
+
+    *idx = arr->length;
+
     arr->length++;
 }
 

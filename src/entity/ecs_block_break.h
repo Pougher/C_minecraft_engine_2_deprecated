@@ -10,13 +10,12 @@
 #include <stdbool.h>
 
 #include "ecs_camera.h"
+#include "ecs_defaults.h"
 
 #include "../block/block.h"
 
 #include "../util/ray.h"
 #include "../util/mouse_state.h"
-
-#define BLOCK_REACH 5
 
 typedef struct {
     // reference to the entity camera
@@ -24,12 +23,6 @@ typedef struct {
 
     // reference to the entity position
     vec3 *pos;
-
-    // block coordinates of the intersection
-    vec3 intersection;
-
-    // if the player has raycast into a block
-    bool intersect;
 } ECSblockbreak;
 
 // initializes block break component.

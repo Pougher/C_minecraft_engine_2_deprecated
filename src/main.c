@@ -94,7 +94,8 @@ int main(void) {
     init_glfw();
 
     Window win;
-    window_init(&win, 1280, 720, "Game");
+    window_init(&win, 1920, 1080, "Game");
+
     init_glew();
 
     glfwSetInputMode(win.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -102,6 +103,8 @@ int main(void) {
     gamestate_init("res/block_atlas.png",
         (char*[]) { "shaders/vs0.glsl", "shaders/fs0.glsl" },
         1);
+
+    state->window = &win;
 
     Camera *cam = dynarray_get(state->ecs->camera,
         ecs_get_component_id(state->player, CAMERA));

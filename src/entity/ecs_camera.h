@@ -8,9 +8,6 @@
 typedef struct {
     // the camera reference
     Camera cam;
-
-    // the direction vector (calculated every physics tick)
-    vec3 direction;
 } ECScamera;
 
 // creates a new camera object

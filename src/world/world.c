@@ -129,6 +129,10 @@ void world_render(World *world) {
     for (i32 i = 0; i < WORLD_AREA; i++) {
         mesh_render(world->chunks[i]->fluid_mesh);
     }
+
+    for (i32 i = 0; i < WORLD_AREA; i++) {
+        mesh_render(world->chunks[i]->transparent_mesh);
+    }
 }
 
 // inline function to detect if a chunk is in bounds of the world at the current

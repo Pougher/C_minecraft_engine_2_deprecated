@@ -18,6 +18,7 @@
 #include "ecs_position.h"
 #include "ecs_camera.h"
 #include "ecs_block_break.h"
+#include "ecs_block_place.h"
 
 // macro to generate memory allocations for dynamic arrays containing entity
 // components
@@ -48,6 +49,19 @@
         _ecs->_component,                                \
         _name->components[_key]));
 
+// macro for generating ecs component switch statements and code to add them to
+// an entity
+#define ECS_RECIPE_MATCH(_ent_name, _cpt_name, _cpt_key)        \
+    case _cpt_key: {                                            \
+        ECS##_cpt_name _cpt_name;                               \
+        ecs_##_cpt_name##_init(&_cpt_name);                     \
+        dynarray_push_index(manager->_cpt_name,                 \
+            &_cpt_name,                                         \
+            &component_index);                                  \
+        _ent_name->components[_cpt_key] = component_index;      \
+        break;                                                  \
+    }
+
 // generates a for loop which iterates over all instances of the specified
 // component type, calling the tick method for each component
 #define ECS_TICK_COMPONENT(_name)                                       \
@@ -66,6 +80,7 @@ typedef struct {
     DynArray *position;
     DynArray *camera;
     DynArray *blockbreak;
+    DynArray *blockplace;
 
     // the highest ID of the previously allocated entity
     u64 id;

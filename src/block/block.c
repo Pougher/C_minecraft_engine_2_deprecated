@@ -8,6 +8,10 @@ void block_init(void) {
     BLOCK_DECL(sand);
     BLOCK_DECL(water);
     BLOCK_DECL(bedrock);
+    BLOCK_DECL(wood);
+    BLOCK_DECL(planks);
+    BLOCK_DECL(glass);
+    BLOCK_DECL(leaves);
 }
 
 void block_print_name(BlockType id) {
@@ -19,6 +23,10 @@ void block_print_name(BlockType id) {
         BLOCK_LOG_ID(SAND);
         BLOCK_LOG_ID(WATER);
         BLOCK_LOG_ID(BEDROCK);
+        BLOCK_LOG_ID(WOOD);
+        BLOCK_LOG_ID(PLANKS);
+        BLOCK_LOG_ID(GLASS);
+        BLOCK_LOG_ID(LEAVES);
         default: {
             log_warning("Block ID not known");
             break;

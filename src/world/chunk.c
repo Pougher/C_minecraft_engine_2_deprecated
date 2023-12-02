@@ -11,6 +11,7 @@ Chunk *chunk_new(i64 x, i64 y, i64 z) {
     // setup the mesh with (x, y, z) and texture (u, v) coordinates
     chunk->solid_mesh = mesh_new();
     chunk->fluid_mesh = mesh_new();
+    chunk->transparent_mesh = mesh_new();
 
     // vertex position attribute, 1 extra int for block id and uvs
     mesh_add_attribute(chunk->solid_mesh, (MeshAttribute) {
@@ -26,6 +27,7 @@ Chunk *chunk_new(i64 x, i64 y, i64 z) {
         .bytes = sizeof(float) * 3 });
 
     mesh_copy_attributes(chunk->fluid_mesh, chunk->solid_mesh);
+    mesh_copy_attributes(chunk->transparent_mesh, chunk->solid_mesh);
 
     for (int i = 0; i <
         CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y * CHUNK_OVERSCAN_Z; i++)
@@ -71,12 +73,17 @@ static u8 chunk_test_adjacent_solid(Chunk *chunk, i32 x, i32 y, i32 z) {
 static i8 chunk_test_adjacent_fluid(Chunk *chunk, i32 x, i32 y, i32 z) {
     i8 result = 0;
 
-    result |= (chunk_get_block(chunk, x - 1, y, z) == AIR);
-    result |= (chunk_get_block(chunk, x + 1, y, z) == AIR) << 1;
-    result |= (chunk_get_block(chunk, x, y - 1, z) == AIR) << 2;
-    result |= (chunk_get_block(chunk, x, y + 1, z) == AIR) << 3;
-    result |= (chunk_get_block(chunk, x, y, z - 1) == AIR) << 4;
-    result |= (chunk_get_block(chunk, x, y, z + 1) == AIR) << 5;
+    result |= (state->blocks[chunk_get_block(chunk, x - 1, y, z)].transparent);
+    result |= (state->blocks[chunk_get_block(chunk, x + 1, y, z)].transparent)
+        << 1;
+    result |= (state->blocks[chunk_get_block(chunk, x, y - 1, z)].transparent)
+        << 2;
+    result |= (state->blocks[chunk_get_block(chunk, x, y + 1, z)].transparent)
+        << 3;
+    result |= (state->blocks[chunk_get_block(chunk, x, y, z - 1)].transparent)
+        << 4;
+    result |= (state->blocks[chunk_get_block(chunk, x, y, z + 1)].transparent)
+        << 5;
 
     // invert the bits of the result such that a 1 denotes that the face has not
     // got any block adjacent to it on that side
@@ -104,10 +111,39 @@ static inline double chunk_octave_noise(struct osn_context *ctx,
     return value;
 }
 
+// chunk tree generation algorithm
+static void chunk_generate_tree(Chunk *chunk, i32 index, i32 x, i32 y, i32 z) {
+    for (i32 i = x - 2; i < x + 3; i++) {
+        for (i32 j = z - 2; j < z + 3; j++) {
+            chunk_set_block(chunk, i, y + 3, j, LEAVES);
+            chunk_set_block(chunk, i, y + 4, j, LEAVES);
+        }
+    }
+    for (i32 i = x - 1; i < x + 2; i++) {
+        for (i32 j = z - 1; j < z + 2; j++) {
+            chunk_set_block(chunk, i, y + 5, j, LEAVES);
+        }
+    }
+
+    for (i32 i = 0; i < 4; i++) {
+        chunk->blocks[index + i * CHUNK_OVERSCAN_X] = WOOD;
+    }
+
+    // finish off the trees with the + shaped bit at the top (hardcoded because
+    // I can't be bothered to do it with for loops)
+    chunk_set_block(chunk, x + 1, y + 6, z, LEAVES);
+    chunk_set_block(chunk, x, y + 6, z + 1, LEAVES);
+    chunk_set_block(chunk, x - 1, y + 6, z, LEAVES);
+    chunk_set_block(chunk, x, y + 6, z - 1, LEAVES);
+}
+
 void chunk_generate(Chunk *chunk) {
     // open simplex noise struct
     struct osn_context *ctx;
     open_simplex_noise(69420, &ctx);
+
+    // seed the random number generator
+    srand(69420);
 
     for (i32 x = 0; x < CHUNK_OVERSCAN_X; x++) {
         for (i32 z = 0; z < CHUNK_OVERSCAN_Z; z++) {
@@ -118,12 +154,21 @@ void chunk_generate(Chunk *chunk) {
             int val = ((v + 1.0) / 2) * (CHUNK_Y / 3) + 30;
 
             for (i32 y = 0; y < CHUNK_OVERSCAN_Y; y++) {
-                i32 i = x
-                    + (y * CHUNK_OVERSCAN_X)
-                    + (z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y);
+                i32 i = chunk_compute_index(x, y, z);
                 if (y < 47) chunk->blocks[i] = WATER;
                 if (y == val) {
                     chunk->blocks[i] = GRASS;
+                }
+                // note: trees should not be generated in the chunk overscan
+                // area. Thus, only generate trees between the edge of the chunk
+                // plus 1 and its maximum size plus 1
+                if (y == val + 1 && y >= 50 && x > 1 && x < CHUNK_X - 1 &&
+                    z > 1 && z < CHUNK_X - 1) {
+                    // random number to check if we should generate a tree
+                    i32 chance = rand() % CHUNK_TREE_CHANCE;
+                    if (chance == 1) {
+                        chunk_generate_tree(chunk, i, x, y, z);
+                    }
                 }
                 if (y < val) {
                     chunk->blocks[i] = DIRT;
@@ -146,6 +191,7 @@ void chunk_compute_mesh(Chunk *chunk) {
     // reset the chunks mesh information
     mesh_reset(chunk->fluid_mesh);
     mesh_reset(chunk->solid_mesh);
+    mesh_reset(chunk->transparent_mesh);
 
     for (i32 x = CHUNK_OVERSCAN; x < CHUNK_OVERSCAN_X - CHUNK_OVERSCAN; x++) {
         for (i32 y = CHUNK_OVERSCAN; y < CHUNK_OVERSCAN_Y - CHUNK_OVERSCAN; y++) {
@@ -163,6 +209,9 @@ void chunk_compute_mesh(Chunk *chunk) {
                 if (state->blocks[chunk->blocks[i]].fluid) {
                     adj = chunk_test_adjacent_fluid(chunk, x, y, z);
                     mesh = chunk->fluid_mesh;
+                } else if (state->blocks[chunk->blocks[i]].transparent) {
+                    adj = 0xff;
+                    mesh = chunk->transparent_mesh;
                 } else {
                     adj = chunk_test_adjacent_solid(chunk, x, y, z);
                     mesh = chunk->solid_mesh;
@@ -234,6 +283,7 @@ void chunk_compute_mesh(Chunk *chunk) {
 
     mesh_compute_buffers(chunk->solid_mesh);
     mesh_compute_buffers(chunk->fluid_mesh);
+    mesh_compute_buffers(chunk->transparent_mesh);
 }
 
 BlockType chunk_get_block(Chunk *chunk, i32 x, i32 y, i32 z) {
@@ -251,9 +301,9 @@ BlockType chunk_get_block(Chunk *chunk, i32 x, i32 y, i32 z) {
 }
 
 BlockType chunk_get_block_offset(Chunk *chunk, i32 x, i32 y, i32 z) {
-    if (x < 0 ||
-        y < 0 ||
-        z < 0 ||
+    if (x < 1 ||
+        y < 1 ||
+        z < 1 ||
         x >= CHUNK_X ||
         y >= CHUNK_Y ||
         z >= CHUNK_Z) {
@@ -267,9 +317,22 @@ size_t chunk_compute_index(i32 x, i32 y, i32 z) {
     return x + y * CHUNK_OVERSCAN_X + z * CHUNK_OVERSCAN_X * CHUNK_OVERSCAN_Y;
 }
 
+void chunk_set_block(Chunk *chunk, i32 x, i32 y, i32 z, BlockType t) {
+    if (x < 0 ||
+        y < 0 ||
+        z < 0 ||
+        x >= CHUNK_OVERSCAN_X ||
+        y >= CHUNK_OVERSCAN_Y ||
+        z >= CHUNK_OVERSCAN_Z) {
+        return;
+    }
+    chunk->blocks[chunk_compute_index(x, y, z)] = t;
+}
+
 void chunk_free(Chunk *chunk) {
     mesh_free(chunk->solid_mesh);
     mesh_free(chunk->fluid_mesh);
+    mesh_free(chunk->transparent_mesh);
     free(chunk->blocks);
     free(chunk);
 }

@@ -27,7 +27,7 @@ void ecs_blockbreak_mouse_tick(ECSblockbreak *bb, MouseState *ms) {
             if (id != AIR) {
                 world_set_block(
                     state->world, ray.pos[0], ray.pos[1], ray.pos[2], AIR);
-                break;
+                return;
             }
             ray_step(&ray);
         }
