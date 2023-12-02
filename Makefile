@@ -22,7 +22,7 @@ ifneq ($(OS),Windows_NT)
 		useless := $(info Building for Darwin (macos))
 		LDFLAGS += -framework OpenGl -framework IOKit -framework Cocoa
 	else ifeq ($(UNAME_S),Linux)
-		useless := $(info Building for linux)
+		useless := $(info Building for linux (tested on Arch))
 		LDFLAGS += -lGL
 	endif
 else

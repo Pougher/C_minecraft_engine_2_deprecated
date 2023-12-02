@@ -130,7 +130,7 @@ void chunk_generate(Chunk *chunk) {
                 }
                 if (y == val && val < 50) chunk->blocks[i] = SAND;
                 if (y < (f64)val * 0.8) chunk->blocks[i] = STONE;
-                if (y == 0) chunk->blocks[i] = BEDROCK;
+                if (y == CHUNK_OVERSCAN) chunk->blocks[i] = BEDROCK;
             }
         }
     }

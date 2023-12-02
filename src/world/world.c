@@ -83,10 +83,41 @@ void world_set_block(World *world, f64 x, f64 y, f64 z, BlockType block) {
     i32 chunk_coord_x = (x < 0 ? CHUNK_X - 1 : 0) + ((i64)x % CHUNK_X);
     i32 chunk_coord_z = (z < 0 ? CHUNK_Z - 1 : 0) + ((i64)z % CHUNK_Z);
 
+    // I have no idea if this is a good solution, but it does work. However,
+    // it was quite annoying to implement :/
     world->chunks[world_chunk_offset(world, cx, cz)]->blocks[
         chunk_compute_index(chunk_coord_x, y, chunk_coord_z)] = block;
-
     chunk_compute_mesh(world->chunks[world_chunk_offset(world, cx, cz)]);
+
+    if (chunk_coord_x == 0) {
+        int offset = world_chunk_offset(world, cx - 1, cz);
+        world->chunks[offset]->blocks[
+            chunk_compute_index(CHUNK_X, y, chunk_coord_z)] = block;
+        chunk_compute_mesh(world->chunks[offset]);
+    }
+
+    if (chunk_coord_z == 0) {
+        int offset = world_chunk_offset(world, cx, cz - 1);
+        world->chunks[offset]->blocks[
+            chunk_compute_index(chunk_coord_x, y, CHUNK_Z)] = block;
+        chunk_compute_mesh(world->chunks[offset]);
+    }
+
+    if (chunk_coord_x == 1) {
+        int offset = world_chunk_offset(world, cx - 1, cz);
+        world->chunks[offset]->blocks[
+            chunk_compute_index(
+                CHUNK_X + CHUNK_OVERSCAN, y, chunk_coord_z)] = block;
+        chunk_compute_mesh(world->chunks[offset]);
+    }
+
+    if (chunk_coord_z == 1) {
+        int offset = world_chunk_offset(world, cx, cz - 1);
+        world->chunks[offset]->blocks[
+            chunk_compute_index(
+                chunk_coord_x, y, CHUNK_Z + CHUNK_OVERSCAN)] = block;
+        chunk_compute_mesh(world->chunks[offset]);
+    }
 }
 
 void world_render(World *world) {

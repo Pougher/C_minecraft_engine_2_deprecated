@@ -9,7 +9,7 @@ void ecs_blockbreak_init(ECSblockbreak *bb) {
 void ecs_blockbreak_mouse_tick(ECSblockbreak *bb, MouseState *ms) {
     if (ms->button == GLFW_MOUSE_BUTTON_LEFT && ms->action == GLFW_PRESS) {
         Ray ray = {
-            .step = 1024.0f
+            .step = 2048.0f
         };
 
         glm_vec3_copy(bb->cam->cam.front, ray.direction);
@@ -19,7 +19,7 @@ void ecs_blockbreak_mouse_tick(ECSblockbreak *bb, MouseState *ms) {
 
         BlockType id;
 
-        for (int i = 0; i < BLOCK_REACH * 1024; i++) {
+        for (int i = 0; i < BLOCK_REACH * 2048; i++) {
             id = world_get_block(state->world,
                 ray.pos[0],
                 ray.pos[1],
