@@ -68,6 +68,13 @@ BlockType world_get_block(World *world, f64 x, f64 y, f64 z) {
         chunk_coord_z);
 }
 
+float world_get_next_ground(World *world, f64 x, f64 y, f64 z) {
+    for (float dy = floorf(y); dy > 0; dy--) {
+        if (world_get_block(world, x, dy, z) != AIR) return dy;
+    }
+    return y + 1;
+}
+
 void world_set_block(World *world, f64 x, f64 y, f64 z, BlockType block) {
     if (y >= CHUNK_Y) return;
 

@@ -94,7 +94,7 @@ int main(void) {
     init_glfw();
 
     Window win;
-    window_init(&win, 1920, 1080, "Game");
+    window_init(&win, 1280, 720, "Game");
 
     init_glew();
 
@@ -106,8 +106,7 @@ int main(void) {
 
     state->window = &win;
 
-    Camera *cam = dynarray_get(state->ecs->camera,
-        ecs_get_component_id(state->player, CAMERA));
+    Camera *cam = &state->player->camera->cam;
 
     glfwSetWindowUserPointer(win.window, cam);
 
@@ -154,13 +153,10 @@ int main(void) {
         shader_setint(&state->shaders[0], "tex", 0);
         world_render(state->world);
 
-        camera_update(cam, win.window);
-
         glfwSwapBuffers(win.window);
         glfwPollEvents();
 
         state->delta = glfwGetTime() - start_frame;
-
         // update the physics engine
         if (timer_ready(&gametick)) {
             // update the ECS
@@ -169,6 +165,9 @@ int main(void) {
             // update the world
             world_update(state->world);
         }
+
+        // update per frame entities
+        ecs_update_frame(state->ecs);
 
         frames++;
         if (timer_ready(&fps)) {
@@ -181,6 +180,8 @@ int main(void) {
         if (glfwGetKey(win.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             break;
         }
+
+        camera_update(cam, win.window);
     }
 
     gamestate_free();

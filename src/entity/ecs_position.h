@@ -7,6 +7,8 @@
 
 #include "../common/types.h"
 
+struct Entity;
+
 // component to hold the position of an entity.
 typedef struct {
     // the position in 3D world space of the entity
@@ -23,6 +25,6 @@ typedef struct {
 void ecs_position_init(ECSposition*);
 
 // called every game tick, updates the chunk coordinates value of an entity
-void ecs_position_tick(ECSposition*);
+void ecs_position_tick(struct Entity*, ECSposition*);
 
 #endif

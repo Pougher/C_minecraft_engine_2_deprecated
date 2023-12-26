@@ -19,6 +19,7 @@
 #include "../common/types.h"
 
 #include "../entity/ecs.h"
+#include "../entity/entity_constructors.h"
 
 struct GameState {
     // the current OpenGL window context

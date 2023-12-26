@@ -57,6 +57,9 @@ BlockType world_get_block(World*, f64, f64, f64);
 // sets a block in the world at any position
 void world_set_block(World*, f64, f64, f64, BlockType);
 
+// gets the next solid block position for any given world coordinate
+float world_get_next_ground(World*, f64, f64, f64);
+
 // renders the world to the screen by drawing each chunk's mesh
 void world_render(World*);
 

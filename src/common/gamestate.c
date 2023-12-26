@@ -42,35 +42,7 @@ void gamestate_init(char *block_atlas_dir,
 
     // create the player entity
     log_info("Creating the player entity");
-    state->player = ecs_create_entity(state->ecs,
-        (ECSType[]) {
-            CAMERA,
-            POSITION,
-            BLOCKBREAK,
-            BLOCKPLACE
-        }, 4);
-
-    ECSposition *pos = dynarray_get(
-        state->ecs->position, ecs_get_component_id(state->player, POSITION));
-    ECScamera *cam = dynarray_get(
-        state->ecs->camera, ecs_get_component_id(state->player, CAMERA));
-    ECSblockbreak *bb = dynarray_get(
-        state->ecs->blockbreak,
-        ecs_get_component_id(state->player, BLOCKBREAK));
-    ECSblockplace *bp = dynarray_get(
-        state->ecs->blockplace,
-        ecs_get_component_id(state->player, BLOCKPLACE));
-
-    bb->cam = cam;
-    bb->pos = &pos->pos;
-    bp->cam = cam;
-    bp->pos = &pos->pos;
-
-    camera_init(&cam->cam, &pos->pos);
-    // centre the player
-    glm_vec3_copy((vec3)
-        { WORLD_X * CHUNK_X / 2, 70, WORLD_Z * CHUNK_Z / 2 }, pos->pos);
-    state->world->player_pos = pos;
+    state->player = player_construct();
 }
 
 void gamestate_free(void) {
@@ -87,5 +59,5 @@ void gamestate_free(void) {
     free(state->shaders);
 
     // destroy the entity component system
-    ecs_free(state->ecs);
+    ecs_free(state->ecs); 
 }

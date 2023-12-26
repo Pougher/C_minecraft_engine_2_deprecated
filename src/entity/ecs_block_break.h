@@ -17,12 +17,10 @@
 #include "../util/ray.h"
 #include "../util/mouse_state.h"
 
-typedef struct {
-    // reference to the entity camera
-    ECScamera *cam;
+struct Entity;
 
-    // reference to the entity position
-    vec3 *pos;
+typedef struct {
+    u8 empty;
 } ECSblockbreak;
 
 // initializes block break component.
@@ -31,6 +29,6 @@ typedef struct {
 void ecs_blockbreak_init(ECSblockbreak*);
 
 // ticks the block breaking test
-void ecs_blockbreak_mouse_tick(ECSblockbreak*, MouseState*);
+void ecs_blockbreak_mouse_tick(struct Entity*, ECSblockbreak*, MouseState*);
 
 #endif

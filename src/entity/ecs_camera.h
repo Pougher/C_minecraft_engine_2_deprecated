@@ -13,7 +13,4 @@ typedef struct {
 // creates a new camera object
 void ecs_camera_init(ECScamera*);
 
-// ticks the camera
-void ecs_camera_tick(ECScamera*);
-
 #endif

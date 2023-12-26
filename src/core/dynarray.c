@@ -55,7 +55,7 @@ void dynarray_push_index(DynArray *arr, void *data, size_t *idx) {
             + arr->reserve_queue[arr->reserve_queue_size] * arr->elem_size;
         memcpy(ptr, data, arr->elem_size);
 
-        *idx = arr->reserve_queue[arr->reserve_queue_size];;
+        *idx = arr->reserve_queue[arr->reserve_queue_size];
 
         arr->reserve_queue_uses++;
 
@@ -74,6 +74,7 @@ void dynarray_push_index(DynArray *arr, void *data, size_t *idx) {
     if (arr->length + 1 == arr->cap) {
         arr->cap *= 2;
         arr->data = realloc(arr->data, arr->cap * arr->elem_size);
+        printf("list size: %zu\n", arr->cap);
     }
     memcpy(
         (char*)arr->data + (arr->length * arr->elem_size),

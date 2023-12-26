@@ -19,6 +19,8 @@
 #include "ecs_camera.h"
 #include "ecs_block_break.h"
 #include "ecs_block_place.h"
+#include "ecs_physics.h"
+#include "ecs_player_controller.h"
 
 // macro to generate memory allocations for dynamic arrays containing entity
 // components
@@ -28,7 +30,7 @@
 // NOTE: Does not free any references to data within the component objects,
 // so some memory could be leaked if an object's self-allocated memory is
 // not freed on the deletion of the dynamic array
-#define ECS_COMPONENT_FREE(_name) dynarray_free(manager->_name)
+#define ECS_COMPONENT_FREE(_name) free(entity->_name);
 
 // pastes in the code for generating an ecs component
 #define ECS_ADD_COMPONENT(_name) ECS##_name _name;                      \
@@ -37,11 +39,8 @@
 
 // simply removes the component through dynarray_delete. Also generates a case
 // statement
-#define ECS_DELETE(_match, _name) case _match: {                        \
-                                     dynarray_reserve_delete(ecs->_name,\
-                                         entity->components[i]);        \
-                                  break; }
-
+#define ECS_DELETE(_name) \
+    if (entity->_name != NULL) free(entity->_name);
 // quick and dirty macro for getting the pointer to a specific component within
 // an entity, given a variable name (the entity pointer) and a component type
 #define ECS_GET_COMPONENT(_ecs, _name, _component, _key) \
@@ -51,39 +50,29 @@
 
 // macro for generating ecs component switch statements and code to add them to
 // an entity
-#define ECS_RECIPE_MATCH(_ent_name, _cpt_name, _cpt_key)        \
-    case _cpt_key: {                                            \
-        ECS##_cpt_name _cpt_name;                               \
-        ecs_##_cpt_name##_init(&_cpt_name);                     \
-        dynarray_push_index(manager->_cpt_name,                 \
-            &_cpt_name,                                         \
-            &component_index);                                  \
-        _ent_name->components[_cpt_key] = component_index;      \
-        break;                                                  \
+#define ECS_RECIPE_MATCH(_ent_name, _cpt_name, _cpt_key)            \
+    case _cpt_key: {                                                \
+        ECS##_cpt_name *_cpt_name = malloc(sizeof(ECS##_cpt_name)); \
+        ecs_##_cpt_name##_init(_cpt_name);                          \
+        _ent_name->_cpt_name = _cpt_name;                           \
+        break;                                                      \
     }
 
-// generates a for loop which iterates over all instances of the specified
-// component type, calling the tick method for each component
-#define ECS_TICK_COMPONENT(_name)                                       \
-    for (size_t i = 0; i < manager->_name->length; i++) {               \
-        ecs_##_name##_tick(dynarray_get(manager->_name, i));            \
-    }
+// generates a function to tick a specified component
+#define ECS_TICK_COMPONENT(_name)                           \
+    if (entity->_name != NULL) ecs_##_name##_tick(entity, entity->_name)
 
-#define ECS_MOUSE_TICK_COMPONENT(_name)                                 \
-    for (size_t i = 0; i < manager->_name->length; i++) {               \
-        ecs_##_name##_mouse_tick(                                       \
-            dynarray_get(manager->_name, i), mouse_state);              \
-    }
+#define ECS_MOUSE_TICK_COMPONENT(_name)                             \
+    if (entity->_name != NULL)                                      \
+        ecs_##_name##_mouse_tick(entity, entity->_name, mouse_state)
+
+#define ECS_FRAME_TICK_COMPONENT(_name)                 \
+    if (entity->_name != NULL)                          \
+        ecs_##_name##_frame_tick(entity, entity->_name)
 
 typedef struct {
-    // the entity component lists that any entity can use
-    DynArray *position;
-    DynArray *camera;
-    DynArray *blockbreak;
-    DynArray *blockplace;
-
-    // the highest ID of the previously allocated entity
-    u64 id;
+    // a list of all of the currently allocated entities
+    DynArray *entities;
 } ECSManager;
 
 /*
@@ -108,8 +97,8 @@ void ecs_update(ECSManager*);
 // calls mouse event on all components that support it within the ECS
 void ecs_mouse_update(ECSManager*, MouseState*);
 
-// returns the ID of the component within the entity
-u64 ecs_get_component_id(Entity*, u64);
+// updates entities every frame
+void ecs_update_frame(ECSManager*);
 
 // frees all data bound to the ECS including all memory allocated to entity
 // components within the entity component list
