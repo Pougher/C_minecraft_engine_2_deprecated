@@ -74,7 +74,6 @@ void dynarray_push_index(DynArray *arr, void *data, size_t *idx) {
     if (arr->length + 1 == arr->cap) {
         arr->cap *= 2;
         arr->data = realloc(arr->data, arr->cap * arr->elem_size);
-        printf("list size: %zu\n", arr->cap);
     }
     memcpy(
         (char*)arr->data + (arr->length * arr->elem_size),

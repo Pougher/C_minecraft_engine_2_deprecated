@@ -3,6 +3,7 @@
 
 World *world_new(void) {
     World *world = malloc(sizeof(World));
+
     world->chunks = malloc(sizeof(Chunk*) * WORLD_AREA);
 
     world->width = WORLD_X;
@@ -185,7 +186,6 @@ void world_update(World *world) {
             if (world->chunks[i] == 0) {
                 int x = world->centre[0] + (i % WORLD_X) - (WORLD_X / 2);
                 int z = world->centre[2] + (i / WORLD_X) - (WORLD_Z / 2);
-                //printf("%d %d\n", x * CHUNK_X, z * CHUNK_Z);
                 world->chunks[i] = chunk_new(x * CHUNK_X, 0, z * CHUNK_Z);
                 chunk_generate(world->chunks[i]);
                 chunk_compute_mesh(world->chunks[i]);
@@ -198,5 +198,6 @@ void world_free(World *world) {
     for (i32 i = 0; i < WORLD_AREA; i++) {
         chunk_free(world->chunks[i]);
     }
+    free(world->chunks);
     free(world);
 }

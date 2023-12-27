@@ -59,5 +59,5 @@ void gamestate_free(void) {
     free(state->shaders);
 
     // destroy the entity component system
-    ecs_free(state->ecs); 
+    ecs_free(state->ecs);
 }

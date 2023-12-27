@@ -15,7 +15,6 @@ void ecs_physics_construct(ECSphysics *physics) {
     physics->terminal_velocity = -sqrt((2 * physics->mass * PHYSICS_GRAVITY) /
         (physics->fluid_density * physics->projected_area *
         physics->drag_coefficient));
-    printf("%f\n", physics->terminal_velocity);
 }
 
 void ecs_physics_tick(struct Entity *entity, ECSphysics *physics) {
@@ -29,7 +28,6 @@ void ecs_physics_frame_tick(struct Entity *entity, ECSphysics *physics) {
     glm_vec3_add(physics->av, physics->velocity, temp);
     glm_vec3_scale(temp, state->delta, temp);
     glm_vec3_add(entity->position->pos, temp, entity->position->pos);
-    printf("%f\n", physics->velocity[1]);
     if (world_get_block(state->world,
         (entity->position->pos)[0],
         (entity->position->pos)[1] - 2.0f,
