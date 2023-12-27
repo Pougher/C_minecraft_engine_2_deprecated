@@ -52,6 +52,7 @@ BlockType world_get_block(World *world, f64 x, f64 y, f64 z) {
 
     i64 cx = (i64)x / CHUNK_X;
     i64 cz = (i64)z / CHUNK_Z;
+
     if (x < 0) {
         cx--;
     }
